@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aracım Nerede?</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚗 Aracım Nerede?</h1>
+            <div class="user-info">
+                <span id="userStatus">Yükleniyor...</span>
+            </div>
+        </header>
+
+        <main>
+            <div class="control-panel">
+                <button id="saveLocationBtn" class="btn btn-primary">
+                    <span class="icon">📍</span>
+                    Mevcut Konumu Kaydet
+                </button>
+                <button id="findCarBtn" class="btn btn-secondary">
+                    <span class="icon">🔍</span>
+                    Aracımı Bul
+                </button>
+                <button id="clearDataBtn" class="btn btn-danger">
+                    <span class="icon">🗑️</span>
+                    Verileri Temizle
+                </button>
+            </div>
+
+            <div class="info-section">
+                <div class="info-card">
+                    <h3>Son Kaydedilen Konum</h3>
+                    <div id="lastSavedLocation">
+                        <p class="no-data">Henüz kaydedilmiş konum yok</p>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h3>Mevcut Konum</h3>
+                    <div id="currentLocation">
+                        <p class="no-data">Konum alınıyor...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="map-container">
+                <h3>Harita</h3>
+                <div id="map"></div>
+            </div>
+
+            <div class="history-section">
+                <h3>Konum Geçmişi</h3>
+                <div id="locationHistory">
+                    <p class="no-data">Henüz geçmiş yok</p>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Tarayıcı kapatılıp açılsa bile verileriniz korunur</p>
+        </footer>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@4/dist/fp.min.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
+
