@@ -21,14 +21,14 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     margin: 0;
     padding: 0;
-    overflow: hidden;
     color: var(--text-primary);
-    background: #f5f5f5;
+    background: var(--bg-color);
+    overflow: hidden;
 }
 
 /* Harita - Tam Ekran */
 #map {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
@@ -38,106 +38,37 @@ body {
     z-index: 1;
 }
 
-/* Floating Action Button - Araç */
-.fab {
+/* Main Container */
+.main-container {
     position: fixed;
-    right: 20px;
-    bottom: 340px;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary-color) 0%, #1e40af 100%);
-    color: white;
-    border: none;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
-    cursor: pointer;
-    z-index: 999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    pointer-events: none;
 }
 
-.fab:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.6);
+.main-container > * {
+    pointer-events: auto;
 }
 
-.fab:active {
-    transform: scale(0.95);
-}
-
-.fab svg {
-    width: 28px;
-    height: 28px;
-}
-
-/* Compass Button */
-.compass-btn {
-    position: fixed;
-    right: 20px;
-    top: 20px;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: white;
-    color: var(--text-primary);
-    border: none;
-    box-shadow: var(--shadow);
-    cursor: pointer;
-    z-index: 999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-}
-
-.compass-btn:hover {
-    background: var(--bg-color);
-}
-
-/* Notes Button */
-.notes-btn {
-    position: fixed;
-    right: 20px;
-    top: 80px;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: white;
-    color: var(--text-primary);
-    border: none;
-    box-shadow: var(--shadow);
-    cursor: pointer;
-    z-index: 999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-}
-
-.notes-btn:hover {
-    background: var(--bg-color);
+/* Header */
+.header {
+    display: none;
 }
 
 /* Bottom Sheet */
 .bottom-sheet {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
     background: white;
     border-radius: 20px 20px 0 0;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1000;
-    transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    height: 300px;
-    max-height: 85vh;
-    overflow: hidden;
 }
 
 .bottom-sheet.expanded {
-    height: 85vh;
+    flex: 1;
+    z-index: 1002;
 }
 
 /* Drag Handle */
@@ -158,17 +89,54 @@ body {
 .bottom-sheet-content {
     padding: 0 20px 20px 20px;
     overflow-y: auto;
-    max-height: calc(85vh - 50px);
-}
-
-.bottom-sheet-content.hidden {
-    display: none;
+    max-height: calc(100vh - 120px);
 }
 
 /* Arama Kutusu */
 .search-box {
     position: relative;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
+}
+
+/* Expand Button - External (Sağ Taraf Dikey Orta) */
+.expand-btn-external {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color) 0%, #1e40af 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    z-index: 999;
+}
+
+.expand-btn-external:hover {
+    transform: translateY(-50%) scale(1.05);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.6);
+}
+
+.expand-btn-external:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.expand-btn-external svg {
+    width: 28px;
+    height: 28px;
+    transition: transform 0.3s ease;
+}
+
+.expand-btn-external.expanded {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
 
 .search-icon {
@@ -243,9 +211,27 @@ body {
     text-align: center;
 }
 
+/* Araç İçeriği */
+.car-content {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.car-content.expanded {
+    max-height: 1000px;
+    opacity: 1;
+    margin-top: 20px;
+}
+
 /* Araç Kayıt Bölümü */
 .car-section {
     animation: fadeIn 0.3s ease;
+}
+
+.car-section.hidden {
+    display: none;
 }
 
 @keyframes fadeIn {
@@ -260,18 +246,29 @@ body {
 }
 
 .section-header {
-    margin-bottom: 24px;
+    margin-bottom: 16px;
 }
 
 .section-header h3 {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 600;
     color: var(--text-primary);
 }
 
 /* Form Elements */
+.form-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
 .form-group {
     margin-bottom: 20px;
+}
+
+.form-group-half {
+    flex: 1;
+    margin-bottom: 0;
 }
 
 .form-group label {
@@ -310,9 +307,7 @@ body {
 }
 
 /* Buttons */
-.btn-save,
-.btn-navigate,
-.btn-delete {
+.btn-save {
     width: 100%;
     padding: 16px;
     border: none;
@@ -325,10 +320,6 @@ body {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    margin-bottom: 12px;
-}
-
-.btn-save {
     background: var(--primary-color);
     color: white;
 }
@@ -339,44 +330,31 @@ body {
     box-shadow: var(--shadow-lg);
 }
 
-.btn-navigate {
-    background: var(--secondary-color);
-    color: white;
+.btn-save:active {
+    transform: scale(0.98);
 }
 
-.btn-navigate:hover {
-    background: #059669;
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
-}
-
-.btn-delete {
-    background: transparent;
-    color: var(--danger-color);
-    border: 2px solid var(--danger-color);
-}
-
-.btn-delete:hover {
-    background: var(--danger-color);
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: var(--shadow);
+/* Kayıtlı Araçlar Listesi */
+#savedCarsList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 /* Kayıtlı Araç Kartı */
 .saved-car-card {
     display: flex;
-    gap: 16px;
-    padding: 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 16px;
-    margin-bottom: 20px;
-    color: white;
-    box-shadow: var(--shadow-lg);
+    gap: 12px;
+    align-items: center;
+    padding: 16px;
+    background: white;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
 }
 
 .saved-car-icon {
-    font-size: 48px;
+    font-size: 28px;
     display: flex;
     align-items: center;
 }
@@ -385,28 +363,72 @@ body {
     flex: 1;
 }
 
-.saved-car-location {
-    font-size: 24px;
+.saved-car-title {
+    font-size: 16px;
     font-weight: 700;
-    margin-bottom: 8px;
-}
-
-.saved-car-details {
-    font-size: 14px;
-    opacity: 0.9;
-    margin-bottom: 8px;
+    color: var(--text-primary);
+    margin-bottom: 4px;
 }
 
 .saved-car-note {
-    font-size: 14px;
+    font-size: 12px;
     font-style: italic;
-    opacity: 0.8;
-    margin-bottom: 8px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
 }
 
 .saved-car-time {
-    font-size: 12px;
-    opacity: 0.7;
+    font-size: 11px;
+    color: var(--text-secondary);
+    opacity: 0.8;
+}
+
+/* Circular Action Buttons */
+.saved-car-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+}
+
+.btn-circular {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.btn-circular:hover {
+    transform: scale(1.1);
+    box-shadow: var(--shadow);
+}
+
+.btn-circular:active {
+    transform: scale(0.95);
+}
+
+.btn-circular.btn-navigate {
+    background: var(--secondary-color);
+    color: white;
+}
+
+.btn-circular.btn-navigate:hover {
+    background: #059669;
+}
+
+.btn-circular.btn-delete {
+    background: var(--danger-color);
+    color: white;
+}
+
+.btn-circular.btn-delete:hover {
+    background: #dc2626;
 }
 
 /* Notification */
@@ -445,8 +467,8 @@ body {
 }
 
 /* Leaflet Custom Markers */
-.current-location-marker,
-.car-location-marker {
+.start-location-marker,
+.parking-location-marker {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -454,25 +476,6 @@ body {
 
 /* Responsive */
 @media (max-width: 768px) {
-    .fab {
-        right: 16px;
-        bottom: 340px;
-        width: 52px;
-        height: 52px;
-    }
-
-    .fab svg {
-        width: 24px;
-        height: 24px;
-    }
-
-    .compass-btn,
-    .notes-btn {
-        right: 16px;
-        width: 44px;
-        height: 44px;
-    }
-
     .category-grid {
         grid-template-columns: repeat(3, 1fr);
         gap: 12px;
@@ -490,63 +493,53 @@ body {
         font-size: 12px;
     }
 
-    .saved-car-info {
-        text-align: left;
+    .saved-car-card {
+        padding: 14px;
     }
 
-    .saved-car-location {
-        font-size: 20px;
+    .saved-car-title {
+        font-size: 15px;
     }
-    
+
+    .saved-car-icon {
+        font-size: 26px;
+    }
+
     .bottom-sheet {
-        height: 300px;
+        left: 0;
+        right: 0;
+    }
+
+    .expand-btn-external {
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 52px;
+        height: 52px;
+    }
+
+    .expand-btn-external svg {
+        width: 24px;
+        height: 24px;
     }
 }
 
 @media (min-width: 769px) {
-    .bottom-sheet {
+    .main-container {
         left: 50%;
         transform: translateX(-50%);
-        max-width: 480px;
-        border-radius: 20px;
-        bottom: 20px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        max-width: 600px;
     }
 
-    .bottom-sheet.expanded {
-        height: calc(100vh - 40px);
-        bottom: 20px;
+    .bottom-sheet {
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15), 0 0 40px rgba(0, 0, 0, 0.1);
     }
 
-    .fab {
-        right: calc(50% - 260px);
-        bottom: auto;
+    .expand-btn-external {
+        right: 0;
         top: 50%;
         transform: translateY(-50%);
     }
-    
-    .compass-btn {
-        top: 20px;
-    }
-    
-    .notes-btn {
-        top: 80px;
-    }
-}
-
-/* Loading Animation */
-.loading {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    border-top-color: white;
-    animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
 }
 
 /* Smooth Scrollbar */
@@ -565,4 +558,19 @@ body {
 
 .bottom-sheet-content::-webkit-scrollbar-thumb:hover {
     background: var(--text-secondary);
+}
+
+/* Loading Animation */
+.loading {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }

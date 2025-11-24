@@ -11,163 +11,122 @@
     <!-- Harita Container -->
     <div id="map"></div>
 
-    <!-- Floating Action Button - Araç Kaydı -->
-    <button id="carActionBtn" class="fab">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+    <!-- Expand Button (Bottom Sheet Dışında) -->
+    <button id="expandBtn" class="expand-btn-external">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
             <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
         </svg>
     </button>
 
-    <!-- Compass Button -->
-    <button id="compassBtn" class="compass-btn">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
-        </svg>
-    </button>
-
-    <!-- Notes Button -->
-    <button id="notesBtn" class="notes-btn">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-            <line x1="9" y1="10" x2="15" y2="10"/>
-            <line x1="9" y1="14" x2="13" y2="14"/>
-        </svg>
-    </button>
-
-    <!-- Bottom Sheet -->
-    <div id="bottomSheet" class="bottom-sheet">
-        <!-- Drag Handle -->
-        <div class="bottom-sheet-handle"></div>
-
-        <!-- Normal İçerik (Default) -->
-        <div id="normalContent" class="bottom-sheet-content">
-            <!-- Arama Kutusu -->
-            <div class="search-box">
-                <svg class="search-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"/>
-                    <path d="m21 21-4.35-4.35"/>
-                </svg>
-                <input type="text" id="searchInput" placeholder="Nereyi arıyorsun?">
-            </div>
-
-            <!-- Kategori Grid -->
-            <div class="category-grid">
-                <div class="category-item">
-                    <div class="category-icon">🛒</div>
-                    <div class="category-name">Alışveriş</div>
-                </div>
-                <div class="category-item">
-                    <div class="category-icon">🍽️</div>
-                    <div class="category-name">Yemek</div>
-                </div>
-                <div class="category-item">
-                    <div class="category-icon">❓</div>
-                    <div class="category-name">Diğer</div>
-                </div>
-                <div class="category-item">
-                    <div class="category-icon">🚻</div>
-                    <div class="category-name">Tuvalet</div>
-                </div>
-                <div class="category-item">
-                    <div class="category-icon">🚪</div>
-                    <div class="category-name">Giriş</div>
-                </div>
-                <div class="category-item">
-                    <div class="category-icon">🏧</div>
-                    <div class="category-name">ATM</div>
-                </div>
-            </div>
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🚗 Aracım Nerede?</h1>
         </div>
 
-        <!-- Araç Kayıt İçeriği -->
-        <div id="carContent" class="bottom-sheet-content hidden">
-            <!-- Kayıt Yok Durumu -->
-            <div id="noCarSaved" class="car-section">
-                <div class="section-header">
-                    <h3>🚗 Araç Park Yeri Kaydet</h3>
-                </div>
+        <!-- Bottom Sheet -->
+        <div id="bottomSheet" class="bottom-sheet">
+            <!-- Drag Handle -->
+            <div class="bottom-sheet-handle"></div>
 
-                <div class="form-group">
-                    <label>Otopark Bölgesi</label>
-                    <select id="parkingZone" class="form-select">
-                        <option value="">Bölge Seçin</option>
-                        <option value="A">A Blok Otopark</option>
-                        <option value="B">B Blok Otopark</option>
-                        <option value="C">C Blok Otopark</option>
-                        <option value="D">D Blok Otopark</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Kat</label>
-                    <select id="parkingFloor" class="form-select">
-                        <option value="">Kat Seçin</option>
-                        <option value="-3">-3. Kat</option>
-                        <option value="-2">-2. Kat</option>
-                        <option value="-1">-1. Kat</option>
-                        <option value="0">Zemin Kat</option>
-                        <option value="1">1. Kat</option>
-                        <option value="2">2. Kat</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Park Yeri Numarası</label>
-                    <input type="text" id="parkingSpot" class="form-input" placeholder="Örn: A-123">
-                </div>
-
-                <div class="form-group">
-                    <label>Not (Opsiyonel)</label>
-                    <textarea id="parkingNote" class="form-textarea" placeholder="Örn: Mavi direğin yanı"></textarea>
-                </div>
-
-                <button id="saveParkingBtn" class="btn-save">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-                        <polyline points="17 21 17 13 7 13 7 21"/>
-                        <polyline points="7 3 7 8 15 8"/>
+            <div class="bottom-sheet-content">
+                <!-- Arama Kutusu -->
+                <div class="search-box">
+                    <svg class="search-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.35-4.35"/>
                     </svg>
-                    Kaydet
-                </button>
-            </div>
-
-            <!-- Kayıtlı Araç Durumu -->
-            <div id="carSaved" class="car-section hidden">
-                <div class="section-header">
-                    <h3>🚗 Kayıtlı Araç</h3>
+                    <input type="text" id="searchInput" placeholder="Nereyi arıyorsun?">
                 </div>
 
-                <div class="saved-car-card">
-                    <div class="saved-car-icon">🚗</div>
-                    <div class="saved-car-info">
-                        <div class="saved-car-location">
-                            <strong id="savedParkingCode">A-2-123</strong>
-                        </div>
-                        <div class="saved-car-details" id="savedParkingDetails">
-                            A Blok, -2. Kat, Park Yeri: 123
-                        </div>
-                        <div class="saved-car-note" id="savedParkingNote"></div>
-                        <div class="saved-car-time" id="savedParkingTime">
-                            Kaydedildi: 15:30, 20 Kas 2025
-                        </div>
+                <!-- Kategori Grid -->
+                <div class="category-grid">
+                    <div class="category-item">
+                        <div class="category-icon">🛒</div>
+                        <div class="category-name">Alışveriş</div>
+                    </div>
+                    <div class="category-item">
+                        <div class="category-icon">🍽️</div>
+                        <div class="category-name">Yemek</div>
+                    </div>
+                    <div class="category-item">
+                        <div class="category-icon">❓</div>
+                        <div class="category-name">Diğer</div>
+                    </div>
+                    <div class="category-item">
+                        <div class="category-icon">🚻</div>
+                        <div class="category-name">Tuvalet</div>
+                    </div>
+                    <div class="category-item">
+                        <div class="category-icon">🚪</div>
+                        <div class="category-name">Giriş</div>
+                    </div>
+                    <div class="category-item">
+                        <div class="category-icon">🏧</div>
+                        <div class="category-name">ATM</div>
                     </div>
                 </div>
 
-                <button id="navigateBtn" class="btn-navigate">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="3 11 22 2 13 21 11 13 3 11"/>
-                    </svg>
-                    Aracıma Git
-                </button>
+                <!-- Araç Kayıt İçeriği -->
+                <div id="carContent" class="car-content">
+                    <!-- Kayıt Yok Durumu -->
+                    <div id="noCarSaved" class="car-section">
+                        <div class="section-header">
+                            <h3>🚗 Araç Park Yeri Kaydet</h3>
+                        </div>
 
-                <button id="deleteParkingBtn" class="btn-delete">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="3 6 5 6 21 6"/>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                    </svg>
-                    Kaydı Sil
-                </button>
+                        <div class="form-row">
+                            <div class="form-group form-group-half">
+                                <label>Kat</label>
+                                <select id="parkingFloor" class="form-select">
+                                    <option value="">Kat Seçin</option>
+                                    <option value="-3">-3. Kat</option>
+                                    <option value="-2">-2. Kat</option>
+                                    <option value="-1">-1. Kat</option>
+                                    <option value="0">Zemin Kat</option>
+                                    <option value="1">1. Kat</option>
+                                    <option value="2">2. Kat</option>
+                                    <option value="3">3. Kat</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group form-group-half">
+                                <label>Park Yeri No</label>
+                                <select id="parkingSpot" class="form-select">
+                                    <option value="">Park Yeri Seçin</option>
+                                    <option value="A-1" data-location="39.902191,32.754933">A-1</option>
+                                    <option value="B-2" data-location="39.900955,32.755045">B-2</option>
+                                    <option value="C-3" data-location="39.900938,32.759262">C-3</option>
+                                    <option value="D-4" data-location="39.902255,32.759278">D-4</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Not (Opsiyonel)</label>
+                            <textarea id="parkingNote" class="form-textarea" placeholder="Örn: Mavi direğin yanı"></textarea>
+                        </div>
+
+                        <button id="saveParkingBtn" class="btn-save">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                                <polyline points="17 21 17 13 7 13 7 21"/>
+                                <polyline points="7 3 7 8 15 8"/>
+                            </svg>
+                            Kaydet
+                        </button>
+                    </div>
+
+                    <!-- Kayıtlı Araçlar -->
+                    <div id="carSaved" class="car-section hidden">
+                        <div class="section-header">
+                            <h3>🚗 Kayıtlı Araçlar</h3>
+                        </div>
+                        
+                        <div id="savedCarsList"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -177,7 +136,6 @@
 
     <!-- Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@4/dist/fp.min.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

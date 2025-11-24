@@ -1,24 +1,22 @@
 # 🚗 Aracım Nerede?
 
-Vanilla JavaScript ile geliştirilmiş, mobil öncelikli araç park yeri takip uygulaması.
+Vanilla JavaScript ile geliştirilmiş, otopark ve araç park yeri takip uygulaması.
 
 ## 🌟 Özellikler
 
 - ✅ **Framework'süz**: Saf HTML, CSS ve JavaScript
-- 🔐 **Session Yönetimi**: FingerprintJS ile kullanıcı tanımlama
 - 💾 **Kalıcı Veri**: LocalStorage ile veriler tarayıcı kapatılsa bile korunur
 - 🗺️ **Harita Entegrasyonu**: Leaflet.js ile tam ekran interaktif harita
-- 📍 **Gerçek Zamanlı Konum**: Geolocation API ile sürekli konum takibi
-- 🔄 **Çoklu Sekme Desteği**: Farklı sekmelerde senkronize çalışır
-- 🅿️ **Otopark Kodu Sistemi**: Blok, kat ve park yeri numarası kaydetme
-- 📏 **Mesafe Hesaplama**: Mevcut konum ile araç arasındaki mesafe
-- 🎨 **Modern UI**: Bottom sheet, FAB ve mobil-first tasarım
-- 🎯 **Navigasyon**: Tek tuşla aracınıza yol tarifi
+- 🅿️ **Otopark Sistemi**: 4 farklı otopark lokasyonu
+- 📏 **Mesafe Hesaplama**: Başlangıç noktası ile otopark arasındaki mesafe
+- 🎨 **Modern UI**: Bottom sheet, circular butonlar ve mobil-first tasarım
+- 🎯 **Rota Çizimi**: Seçilen otoparka görsel rota gösterimi
+- 📍 **Park Bilgisi Kaydetme**: Kat, park yeri numarası ve not kaydetme
 
 ## 🚀 Kurulum
 
 1. Projeyi indirin veya klonlayın
-2. Bir web sunucusu kullanarak çalıştırın (Geolocation API'si HTTPS veya localhost gerektirir)
+2. Bir web sunucusu kullanarak çalıştırın
 
 ### Basit HTTP Sunucusu Başlatma:
 
@@ -41,39 +39,41 @@ php -S localhost:8000
 
 ## 📱 Kullanım
 
-1. **İlk Açılış**: 
-   - Uygulama açıldığında konum izni isteyecektir. İzin vermelisiniz.
-   - Harita tam ekranda görünecektir
-   - Alt kısımda bottom sheet ve sağ tarafta butonlar görünür
+1. **Otopark Seçimi**: 
+   - Dropdown menüden bir otopark seçin
+   - Veya harita üzerindeki yeşil marker'lara tıklayın
+   - Otomatik olarak başlangıç noktasından rotanız çizilir
 
 2. **Araç Konumu Kaydetme**: 
-   - Sağ alttaki **mavi araba butonu**na tıklayın
-   - Bottom sheet yukarı doğru genişleyecek
-   - Otopark bilgilerini girin:
-     * Otopark Bölgesi (A, B, C, D)
-     * Kat numarası
-     * Park yeri numarası
-     * Opsiyonel not
+   - "Otopark" butonuna tıklayın
+   - Bottom sheet genişleyecek
+   - Kat ve park yeri numarasını seçin
+   - İsteğe bağlı not ekleyin
    - "Kaydet" butonuna basın
 
 3. **Aracı Bulma**:
-   - Tekrar mavi araba butonuna tıklayın
+   - Tekrar "Otopark" butonuna tıklayın
    - Kayıtlı araç bilgileriniz görünecek
-   - "Aracıma Git" butonuna basın
-   - Haritada hem sizin hem de aracınızın konumu gösterilir
-   - Aralarındaki mesafe hesaplanır
+   - Sağ taraftaki yeşil circular butona basarak haritada görebilirsiniz
 
 4. **Veri Silme**:
-   - Araç bilgisi ekranında "Kaydı Sil" butonuna tıklayın
+   - Araç bilgisi kartındaki kırmızı circular butona tıklayın
    - Onaylayın ve kayıt silinsin
+
+## 🗺️ Otopark Konumları
+
+1. **Otopark 1 - Kuzey**: 39.902191, 32.754933
+2. **Otopark 2 - Güneybatı**: 39.900955, 32.755045
+3. **Otopark 3 - Güneydoğu**: 39.900938, 32.759262
+4. **Otopark 4 - Kuzeydoğu**: 39.902255, 32.759278
+
+**Başlangıç Noktası**: 39.901510, 32.757019
 
 ## 🔧 Teknik Detaylar
 
 ### Kullanılan Teknolojiler
 
-- **FingerprintJS**: Kullanıcı tanımlama için
 - **Leaflet.js**: Harita görselleştirme için
-- **Geolocation API**: Konum verisi almak için
 - **LocalStorage API**: Veri saklama için
 - **OpenStreetMap**: Harita tile'ları için
 
@@ -91,25 +91,34 @@ inmapper_car_location/
 
 ### Veri Saklama
 
-Veriler kullanıcı bazında LocalStorage'da saklanır:
-- Kullanıcı ID'si (FingerprintJS)
-- Son kaydedilen araç konumu
-- Konum geçmişi (son 10 kayıt)
-- Son güncelleme zamanı
+Veriler LocalStorage'da saklanır:
+- Seçilen otopark
+- Kat numarası
+- Park yeri numarası
+- Opsiyonel not
+- Kayıt zamanı
 
-### Çoklu Sekme Senkronizasyonu
+### Özellikler
 
-`storage` event listener'ı sayesinde:
-- Bir sekmede yapılan değişiklikler diğer sekmelere yansır
-- Veriler tüm sekmelerde güncel kalır
-- Tutarlı kullanıcı deneyimi sağlanır
+✅ **Harita Üzerinde Görselleştirme**
+- Mavi marker: Başlangıç noktası
+- Yeşil marker'lar: Otopark konumları
+- Kesikli çizgi: Rota
+
+✅ **Responsive Tasarım**
+- Mobil ve masaüstü uyumlu
+- Sürüklenebilir bottom sheet
+
+✅ **Mesafe Hesaplama**
+- Haversine formülü kullanarak
+- Metre veya kilometre cinsinden
 
 ## 🔒 Güvenlik ve Gizlilik
 
 - ❌ Sunucu iletişimi yok
 - ✅ Tüm veriler tarayıcıda saklanır
 - ✅ Kullanıcı girişi gerektirmez
-- ✅ Anonim kullanım (sadece cihaz tanımlama)
+- ✅ GPS konum takibi yok
 
 ## 🌐 Tarayıcı Desteği
 
@@ -120,32 +129,27 @@ Veriler kullanıcı bazında LocalStorage'da saklanır:
 - ✅ Opera 37+
 
 **Gereksinimler:**
-- Geolocation API desteği
 - LocalStorage desteği
 - ES6+ JavaScript desteği
 
 ## 📝 Notlar
 
-1. **HTTPS Gerekliliği**: Modern tarayıcılar Geolocation API'yi sadece HTTPS veya localhost üzerinde çalıştırır.
+1. **Veri Saklama**: Veriler tarayıcının LocalStorage'ında saklanır. Tarayıcı verileri temizlerse kayıtlar silinir.
 
-2. **Konum İzni**: Kullanıcı konum iznini reddetmesi durumunda uygulama çalışmayacaktır.
+2. **Harita**: OpenStreetMap kullanılır, internet bağlantısı gerektirir.
 
-3. **Veri Saklama**: Veriler tarayıcının LocalStorage'ında saklanır. Tarayıcı verileri temizlerse kayıtlar silinir.
-
-4. **Batarya Tüketimi**: Sürekli konum takibi batarya tüketebilir.
+3. **Çoklu Sekme**: Farklı sekmelerdeki değişiklikler otomatik senkronize olur.
 
 ## 🎯 Gelecek Geliştirmeler
 
 - [ ] PWA (Progressive Web App) desteği
 - [ ] Offline çalışma modu
-- [ ] Gerçek yön tarifi entegrasyonu (Google Maps/Apple Maps)
-- [ ] Push notification desteği
-- [ ] Farklı harita teması seçenekleri (karanlık mod)
-- [ ] Konum paylaşma özelliği (QR kod ile)
 - [ ] Çoklu araç kayıt desteği
 - [ ] Fotoğraf ekleme (park yerinin fotoğrafı)
 - [ ] Zamanlayıcı (park süresi hatırlatıcısı)
-- [ ] IndexedDB desteği (geçmiş kayıtlar için)
+- [ ] Farklı harita teması seçenekleri (karanlık mod)
+- [ ] Otopark içi navigasyon (iç mekan haritası)
+- [ ] QR kod ile park yeri paylaşma
 
 ## 📄 Lisans
 
@@ -158,4 +162,3 @@ Katkılarınızı bekliyoruz! Pull request göndermekten çekinmeyin.
 ---
 
 **Not**: Bu uygulama eğitim amaçlıdır. Üretim ortamında kullanmadan önce kapsamlı testler yapılmalıdır.
-
