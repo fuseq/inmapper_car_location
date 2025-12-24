@@ -2,16 +2,6 @@
 
 Vanilla JavaScript ile geliştirilmiş, otopark ve araç park yeri takip uygulaması.
 
-## 🌟 Özellikler
-
-- ✅ **Framework'süz**: Saf HTML, CSS ve JavaScript
-- 💾 **Kalıcı Veri**: LocalStorage ile veriler tarayıcı kapatılsa bile korunur
-- 🗺️ **Harita Entegrasyonu**: Leaflet.js ile tam ekran interaktif harita
-- 🅿️ **Otopark Sistemi**: 4 farklı otopark lokasyonu
-- 📏 **Mesafe Hesaplama**: Başlangıç noktası ile otopark arasındaki mesafe
-- 🎨 **Modern UI**: Bottom sheet, circular butonlar ve mobil-first tasarım
-- 🎯 **Rota Çizimi**: Seçilen otoparka görsel rota gösterimi
-- 📍 **Park Bilgisi Kaydetme**: Kat, park yeri numarası ve not kaydetme
 
 ## 🚀 Kurulum
 
@@ -151,14 +141,4 @@ Veriler LocalStorage'da saklanır:
 - [ ] Otopark içi navigasyon (iç mekan haritası)
 - [ ] QR kod ile park yeri paylaşma
 
-## 📄 Lisans
 
-Bu proje MIT lisansı altında sunulmaktadır.
-
-## 🤝 Katkıda Bulunma
-
-Katkılarınızı bekliyoruz! Pull request göndermekten çekinmeyin.
-
----
-
-**Not**: Bu uygulama eğitim amaçlıdır. Üretim ortamında kullanmadan önce kapsamlı testler yapılmalıdır.
