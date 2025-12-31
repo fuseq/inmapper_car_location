@@ -823,23 +823,67 @@ class CarLocationApp {
         const file = event.target.files[0];
         if (!file) return;
 
-        // Dosya boyutu kontrolü (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            this.showNotification('Resim çok büyük! Maksimum 5MB olmalı.', 'error');
-            return;
-        }
-
         // Dosya tipi kontrolü
         if (!file.type.startsWith('image/')) {
             this.showNotification('Lütfen geçerli bir resim dosyası seçin.', 'error');
             return;
         }
 
+        // Resmi sıkıştır
+        this.compressImage(file);
+    }
+
+    compressImage(file) {
         const reader = new FileReader();
         reader.onload = (e) => {
-            this.currentPhoto = e.target.result;
-            this.updateCameraButton();
-            this.showNotification('✓ Resim eklendi', 'success');
+            const img = new Image();
+            img.onload = () => {
+                // Canvas oluştur
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                // Maksimum boyutlar (1920x1920)
+                let width = img.width;
+                let height = img.height;
+                const maxSize = 1920;
+
+                // Boyutları orantılı olarak küçült
+                if (width > height) {
+                    if (width > maxSize) {
+                        height = (height * maxSize) / width;
+                        width = maxSize;
+                    }
+                } else {
+                    if (height > maxSize) {
+                        width = (width * maxSize) / height;
+                        height = maxSize;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                // Resmi çiz
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // JPEG olarak sıkıştır (kalite: 0.8)
+                let quality = 0.8;
+                let compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+
+                // Eğer hala çok büyükse, kaliteyi düşür
+                while (compressedDataUrl.length > 5 * 1024 * 1024 * 1.37 && quality > 0.1) {
+                    quality -= 0.1;
+                    compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                }
+
+                this.currentPhoto = compressedDataUrl;
+                this.updateCameraButton();
+                
+                // Boyut bilgisi göster
+                const sizeInKB = Math.round(compressedDataUrl.length / 1024);
+                this.showNotification(`✓ Resim eklendi (${sizeInKB} KB)`, 'success');
+            };
+            img.src = e.target.result;
         };
         reader.readAsDataURL(file);
     }
