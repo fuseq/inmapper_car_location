@@ -791,7 +791,7 @@ body {
 :root {
     --item-height: 36px; 
     --visible-items: 3;
-    --picker-bg: #ffffff;
+    --picker-bg: #f8fafc;
     --highlight-line-color: rgba(0, 0, 0, 0.05);
 }
 
@@ -802,7 +802,11 @@ body {
     padding: 14px 16px;
     position: relative;
     z-index: 1;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
+}
+
+.note-photo-pane {
+    padding: 14px 16px 12px 16px;
 }
 
 .picker-header {
@@ -903,15 +907,15 @@ body {
 /* Not Container */
 .note-container {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     align-items: stretch;
 }
 
 .note-textarea {
     flex: 1;
     padding: 10px 12px;
-    border: none;
-    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
     border-radius: 8px;
     font-size: 14px;
     color: var(--text-primary);
@@ -925,8 +929,8 @@ body {
 }
 
 .note-textarea:focus {
-    background: #e8edf5;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .note-textarea::placeholder {
@@ -938,8 +942,8 @@ body {
     width: 64px;
     min-width: 64px;
     height: 64px;
-    border: none;
-    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -951,7 +955,8 @@ body {
 }
 
 .camera-btn:hover {
-    background: #e8edf5;
+    border-color: var(--primary-color);
+    background: #f8fafc;
     color: var(--primary-color);
     transform: scale(1.02);
 }
