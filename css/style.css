@@ -117,11 +117,6 @@ body {
     z-index: 1001;
 }
 
-.expand-btn-external:hover {
-    transform: translateY(-50%) scale(1.05);
-    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.6);
-}
-
 .expand-btn-external:active {
     transform: translateY(-50%) scale(0.95);
 }
@@ -135,6 +130,8 @@ body {
 .expand-btn-external.expanded {
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    opacity: 0;
+    pointer-events: none;
 }
 
 .search-icon {
@@ -226,8 +223,8 @@ body {
 /* Araç Kayıt Bölümü */
 .car-section {
     animation: fadeIn 0.3s ease;
-    min-height: 350px;
-    max-height: 350px;
+    min-height: 380px;
+    max-height: 380px;
     overflow: hidden; /* Scroll'u tamamen kapat */
 }
 
@@ -257,6 +254,47 @@ body {
     font-weight: 600;
     color: var(--text-primary);
     letter-spacing: -0.3px;
+}
+
+/* Section Header with Cancel Button */
+.section-header-with-cancel {
+    margin-bottom: 10px;
+    padding: 0 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    min-height: 26px;
+}
+
+.section-header-with-cancel h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+}
+
+/* Cancel Button */
+.btn-cancel {
+    position: absolute;
+    right: 4px;
+    padding: 4px 10px;
+    height: 26px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.btn-cancel:active {
+    transform: scale(0.95);
 }
 
 /* Form Elements */
@@ -335,13 +373,8 @@ body {
     height: 16px;
 }
 
-.btn-save:hover {
-    transform: translateY(-2px);
-    opacity: 0.95;
-}
-
 .btn-save:active {
-    transform: translateY(0);
+    transform: scale(0.98);
 }
 
 /* Kayıtlı Araçlar Pane */
@@ -349,8 +382,8 @@ body {
     padding: 0;
     background: transparent;
     position: relative;
-    min-height: 350px;
-    max-height: 350px;
+    min-height: 380px;
+    max-height: 380px;
     overflow: hidden;
 }
 
@@ -381,11 +414,6 @@ body {
     font-size: 11px;
     font-weight: 600;
     white-space: nowrap;
-}
-
-.btn-add-new:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
 
 .btn-add-new:active {
@@ -447,9 +475,6 @@ body {
     border-bottom: none;
 }
 
-.saved-car-card:hover {
-    background: #e8edf5;
-}
 
 .saved-car-icon {
     width: 70px;
@@ -570,13 +595,8 @@ body {
     flex-shrink: 0;
 }
 
-.btn-circular:hover {
-    transform: translateY(-2px);
-    opacity: 0.9;
-}
-
 .btn-circular:active {
-    transform: translateY(0);
+    transform: scale(0.95);
 }
 
 .btn-circular.btn-navigate {
@@ -584,18 +604,12 @@ body {
     color: white;
 }
 
-.btn-circular.btn-navigate:hover {
-    background: #059669;
-}
 
 .btn-circular.btn-delete {
     background: #ef4444;
     color: white;
 }
 
-.btn-circular.btn-delete:hover {
-    background: #dc2626;
-}
 
 /* Notification */
 .notification {
@@ -1094,13 +1108,6 @@ body {
     justify-content: center;
     color: var(--text-secondary);
     padding: 0;
-}
-
-.camera-btn:hover {
-    border-color: var(--primary-color);
-    background: #f8fafc;
-    color: var(--primary-color);
-    transform: scale(1.02);
 }
 
 .camera-btn:active {

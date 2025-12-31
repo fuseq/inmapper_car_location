@@ -218,6 +218,8 @@ class CarLocationApp {
         const carContent = document.getElementById('carContent');
         const bottomSheet = document.getElementById('bottomSheet');
         const expandBtn = document.getElementById('expandBtn');
+        const noCarSaved = document.getElementById('noCarSaved');
+        const carSaved = document.getElementById('carSaved');
         
         this.carContentExpanded = !this.carContentExpanded;
         
@@ -229,7 +231,21 @@ class CarLocationApp {
             carContent.classList.remove('expanded');
             bottomSheet.classList.remove('expanded');
             expandBtn.classList.remove('expanded');
+            
+            // Bottom sheet kapatılırken, eğer form açıksa ve kayıtlı araç varsa listeye dön
+            if (!noCarSaved.classList.contains('hidden') && this.savedParkings.length > 0) {
+                this.showSavedCarsList();
+            }
         }
+    }
+
+    showSavedCarsList() {
+        const noCarSaved = document.getElementById('noCarSaved');
+        const carSaved = document.getElementById('carSaved');
+        
+        // Formu gizle, listeyi göster
+        noCarSaved.classList.add('hidden');
+        carSaved.classList.remove('hidden');
     }
 
     async updateCarUI() {
@@ -1052,6 +1068,21 @@ class CarLocationApp {
         if (addNewCarBtn) {
             addNewCarBtn.addEventListener('click', () => {
                 this.showAddCarForm();
+            });
+        }
+
+        // İptal butonu
+        const cancelFormBtn = document.getElementById('cancelFormBtn');
+        if (cancelFormBtn) {
+            cancelFormBtn.addEventListener('click', () => {
+                if (this.savedParkings.length > 0) {
+                    this.showSavedCarsList();
+                } else {
+                    // Kayıt yoksa bottom sheet'i kapat
+                    if (this.carContentExpanded) {
+                        this.toggleCarContent();
+                    }
+                }
             });
         }
 
