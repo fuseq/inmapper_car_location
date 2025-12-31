@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aracım Nerede?</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -73,39 +74,56 @@
                     <!-- Kayıt Yok Durumu -->
                     <div id="noCarSaved" class="car-section">
                         <div class="section-header">
-                            <h3>🚗 Araç Park Yeri Kaydet</h3>
+                            <h3>Araç Park Yeri Kaydet</h3>
                         </div>
 
-                        <div class="form-row">
-                            <div class="form-group form-group-half">
-                                <label>Kat</label>
-                                <select id="parkingFloor" class="form-select">
-                                    <option value="">Kat Seçin</option>
-                                    <option value="-3">-3. Kat</option>
-                                    <option value="-2">-2. Kat</option>
-                                    <option value="-1">-1. Kat</option>
-                                    <option value="0">Zemin Kat</option>
-                                    <option value="1">1. Kat</option>
-                                    <option value="2">2. Kat</option>
-                                    <option value="3">3. Kat</option>
-                                </select>
+                        <!-- iOS Picker -->
+                        <div class="cupertino-pane">
+                            <div class="picker-header">
+                                <span id="result-display">Park Yeri Seç</span>
                             </div>
 
-                            <div class="form-group form-group-half">
-                                <label>Park Yeri No</label>
-                                <select id="parkingSpot" class="form-select">
-                                    <option value="">Park Yeri Seçin</option>
-                                    <option value="A-1" data-location="39.902191,32.754933">A-1</option>
-                                    <option value="B-2" data-location="39.900955,32.755045">B-2</option>
-                                    <option value="C-3" data-location="39.900938,32.759262">C-3</option>
-                                    <option value="D-4" data-location="39.902255,32.759278">D-4</option>
-                                </select>
+                            <div class="picker-labels">
+                                <span>Kat</span>
+                                <span>Sütun</span>
+                                <span>Numara</span>
+                            </div>
+                            
+                            <div class="date-picker">
+                                <div class="highlight-bar"></div>
+                                
+                                <!-- Kat (Normal - Finite) -->
+                                <div class="column" id="col-floor">
+                                    <div class="column-content" id="content-floor"></div>
+                                </div>
+                                
+                                <!-- Sütun (Infinite) -->
+                                <div class="column" id="col-column">
+                                    <div class="column-content" id="content-column"></div>
+                                </div>
+                                
+                                <!-- Numara (Infinite) -->
+                                <div class="column" id="col-number">
+                                    <div class="column-content" id="content-number"></div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label>Not (Opsiyonel)</label>
-                            <textarea id="parkingNote" class="form-textarea" placeholder="Örn: Mavi direğin yanı"></textarea>
+                        <!-- Not Kartı -->
+                        <div class="cupertino-pane">
+                            <div class="picker-header">
+                                <span class="note-header">Not Ekle (Opsiyonel)</span>
+                            </div>
+                            <div class="note-container">
+                                <textarea id="parkingNote" class="note-textarea" placeholder="Örn: Mavi direğin yanı, giriş kapısına yakın..."></textarea>
+                                <button type="button" id="cameraBtn" class="camera-btn" title="Resim Ekle">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                                        <circle cx="12" cy="13" r="4"/>
+                                    </svg>
+                                </button>
+                                <input type="file" id="photoInput" accept="image/*" style="display: none;">
+                            </div>
                         </div>
 
                         <button id="saveParkingBtn" class="btn-save">
@@ -120,11 +138,12 @@
 
                     <!-- Kayıtlı Araçlar -->
                     <div id="carSaved" class="car-section hidden">
-                        <div class="section-header">
-                            <h3>🚗 Kayıtlı Araçlar</h3>
+                        <div class="cupertino-pane saved-cars-pane">
+                            <div class="picker-header">
+                                <span class="note-header">Kayıtlı Araçlar</span>
+                            </div>
+                            <div id="savedCarsList"></div>
                         </div>
-                        
-                        <div id="savedCarsList"></div>
                     </div>
                 </div>
             </div>
@@ -133,6 +152,15 @@
 
     <!-- Notification -->
     <div id="notification" class="notification"></div>
+
+    <!-- Photo Modal -->
+    <div id="photoModal" class="photo-modal">
+        <div class="photo-modal-overlay"></div>
+        <div class="photo-modal-content">
+            <button class="photo-modal-close">&times;</button>
+            <img id="photoModalImage" src="" alt="Park Yeri Fotoğrafı">
+        </div>
+    </div>
 
     <!-- Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

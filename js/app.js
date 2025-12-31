@@ -13,6 +13,17 @@ class CarLocationApp {
         this.startMarker = null;
         this.activeRouteIndex = null; // Aktif rota index'i
         this.broadcastChannel = null; // Cross-tab communication
+        this.currentPhoto = null; // Mevcut resim base64
+        
+        // iOS Picker için değişkenler
+        this.dataFloors = ["B1", "B2"];
+        this.dataColumns = Array.from({length: 16}, (_, i) => String.fromCharCode(65 + i)); // A-P
+        this.dataNumbers = Array.from({length: 22}, (_, i) => i); // 0-21
+        this.ITEM_HEIGHT = 44;
+        this.LOOP_MULTIPLIER = 60;
+        this.selectedFloor = "B1";
+        this.selectedColumn = "A";
+        this.selectedNumber = 0;
         
         // Sabit başlangıç noktası
         this.startLocation = {
@@ -54,6 +65,8 @@ class CarLocationApp {
             // Aktif rotayı geri yükle
             this.restoreActiveRoute();
             
+            // iOS Picker'ı başlat
+            this.initPicker();
             
         } catch (error) {
             console.error('Başlatma hatası:', error);
@@ -183,27 +196,6 @@ class CarLocationApp {
         });
     }
 
-    onParkingSpotSelected() {
-        const parkingSpotSelect = document.getElementById('parkingSpot');
-        const selectedValue = parkingSpotSelect.value;
-        
-        if (!selectedValue) {
-            return;
-        }
-
-        const parking = this.parkingLocations[selectedValue];
-        if (!parking) return;
-
-        const lat = parking.lat;
-        const lng = parking.lng;
-        
-        // Haritayı seçilen otoparka odakla
-        this.map.setView([lat, lng], 17, {
-            animate: true,
-            duration: 1
-        });
-    }
-
     calculateDistance(lat1, lon1, lat2, lon2) {
         // Haversine formülü
         const R = 6371e3; // Dünya'nın yarıçapı (metre)
@@ -270,43 +262,58 @@ class CarLocationApp {
         
         const parkingSpot = parking.parkingSpot || '';
         const floor = parking.floor || '';
-        const title = `${parkingSpot} - Kat ${floor}`;
+        const title = `${parkingSpot} · Kat ${floor}`;
         
         // Tarih formatla
         const savedTime = parking.timestamp ? new Date(parking.timestamp) : new Date();
         const formattedTime = savedTime.toLocaleString('tr-TR', {
             day: '2-digit',
             month: '2-digit',
-            year: 'numeric',
             hour: '2-digit',
             minute: '2-digit'
         });
         
+        // Resim varsa resim göster, yoksa emoji göster
+        const iconHtml = parking.photo 
+            ? `<div class="saved-car-icon saved-car-photo" data-photo="${parking.photo}" style="background-image: url(${parking.photo})"></div>`
+            : `<div class="saved-car-icon">🚗</div>`;
+        
         card.innerHTML = `
-            <div class="saved-car-icon">🚗</div>
+            ${iconHtml}
             <div class="saved-car-info">
                 <div class="saved-car-title">${title}</div>
-                ${parking.note ? `<div class="saved-car-note">💭 ${parking.note}</div>` : ''}
-                <div class="saved-car-time">📅 ${formattedTime}</div>
+                ${parking.note ? `<div class="saved-car-note">${parking.note}</div>` : ''}
+                <div class="saved-car-time">${formattedTime}</div>
             </div>
             <div class="saved-car-actions">
                 <button class="btn-circular btn-navigate" data-index="${index}" title="Rota Oluştur">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
                     </svg>
                 </button>
                 <button class="btn-circular btn-delete" data-index="${index}" title="Sil">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="3 6 5 6 21 6"/>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                        <line x1="14" y1="11" x2="14" y2="17"></line>
                     </svg>
                 </button>
             </div>
         `;
         
         // Event listener'ları ekle
+        const photoIcon = card.querySelector('.saved-car-photo');
         const navigateBtn = card.querySelector('.btn-navigate');
         const deleteBtn = card.querySelector('.btn-delete');
+        
+        if (photoIcon) {
+            photoIcon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.openPhotoModal(parking.photo);
+            });
+        }
         
         navigateBtn.addEventListener('click', () => this.navigateToCar(index));
         deleteBtn.addEventListener('click', () => this.deleteCarLocation(index));
@@ -315,31 +322,37 @@ class CarLocationApp {
     }
 
     async saveCarLocation() {
-        const parkingSpot = document.getElementById('parkingSpot').value;
-        const floor = document.getElementById('parkingFloor').value;
-        const note = document.getElementById('parkingNote').value;
+        const note = document.getElementById('parkingNote');
+        const noteValue = note ? note.value : '';
         
-        if (!parkingSpot) {
-            this.showNotification('Lütfen bir park yeri seçin', 'error');
-            return;
-        }
-
-        if (!floor) {
-            this.showNotification('Lütfen kat numarasını seçin', 'error');
-            return;
-        }
-
-        const parking = this.parkingLocations[parkingSpot];
+        // Picker'dan seçilen değerleri al
+        const parkingSpot = `${this.selectedColumn}-${this.selectedNumber}`;
+        const floor = this.selectedFloor;
+        
+        // Park yerini otopark konumlarından bul veya varsayılan konum kullan
+        let parking = this.parkingLocations[parkingSpot];
+        
+        // Eğer tam eşleşme yoksa, varsayılan bir konum oluştur
         if (!parking) {
-            this.showNotification('Geçersiz park yeri', 'error');
-            return;
+            // Merkez koordinatları etrafında rastgele bir konum oluştur
+            const centerLat = 39.901510;
+            const centerLng = 32.757019;
+            const offset = 0.001; // Yaklaşık 100 metre
+            
+            parking = {
+                id: parkingSpot,
+                name: `${parkingSpot} Park Yeri`,
+                lat: centerLat + (Math.random() - 0.5) * offset * 2,
+                lng: centerLng + (Math.random() - 0.5) * offset * 2
+            };
         }
 
         const newParking = {
             parkingSpot: parkingSpot,
             parkingName: parking.name,
             floor: floor,
-            note: note,
+            note: noteValue,
+            photo: this.currentPhoto, // Resmi ekle
             location: {
                 lat: parking.lat,
                 lng: parking.lng
@@ -353,10 +366,9 @@ class CarLocationApp {
         await this.saveData();
         this.updateCarUI();
         
-        // Formu temizle
-        document.getElementById('parkingSpot').value = '';
-        document.getElementById('parkingFloor').value = '';
-        document.getElementById('parkingNote').value = '';
+        // Not alanını ve resmi temizle
+        if (note) note.value = '';
+        this.clearPhoto();
         
         this.showNotification('🚗 Araç konumu kaydedildi!', 'success');
     }
@@ -631,21 +643,278 @@ class CarLocationApp {
         }
     }
 
+    /* --- iOS PICKER FONKSİYONLARI --- */
+    
+    createItem(text, val) {
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.innerText = text;
+        div.dataset.value = val !== undefined ? val : text;
+        return div;
+    }
+
+    initNormalList(containerId, data) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        data.forEach(item => {
+            container.appendChild(this.createItem(item));
+        });
+    }
+
+    initInfiniteList(containerId, data) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        
+        for (let i = 0; i < this.LOOP_MULTIPLIER; i++) {
+            data.forEach(item => {
+                container.appendChild(this.createItem(item));
+            });
+        }
+    }
+
+    initAllPickerLists() {
+        this.initNormalList('content-floor', this.dataFloors);
+        this.initInfiniteList('content-column', this.dataColumns);
+        this.initInfiniteList('content-number', this.dataNumbers);
+    }
+
+    handleScroll(column) {
+        const items = column.querySelectorAll('.item');
+        const center = column.scrollTop + (column.clientHeight / 2);
+
+        items.forEach(item => {
+            const itemCenter = item.offsetTop + (item.offsetHeight / 2);
+            const distance = Math.abs(center - itemCenter);
+            
+            if (distance < column.clientHeight / 2 + 10) {
+                const angle = (itemCenter - center) / (column.clientHeight / 2) * 45; 
+                
+                item.style.transform = `rotateX(${-angle}deg)`;
+                
+                const opacity = 1 - Math.pow(distance / (column.clientHeight / 2), 2) * 0.6;
+                item.style.opacity = opacity;
+
+                if (distance < this.ITEM_HEIGHT / 2) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            } else {
+                item.style.transform = '';
+                item.style.opacity = 0.3;
+                item.classList.remove('selected');
+            }
+        });
+    }
+
+    checkInfiniteLoop(column, dataLength) {
+        const scrollHeight = column.scrollHeight;
+        const scrollTop = column.scrollTop;
+        const setHeight = dataLength * this.ITEM_HEIGHT;
+        
+        if (scrollTop < setHeight) {
+            const offset = scrollTop; 
+            const middleSetStart = Math.floor(this.LOOP_MULTIPLIER / 2) * setHeight;
+            column.scrollTop = middleSetStart + offset;
+        }
+        else if (scrollTop > scrollHeight - setHeight * 2) {
+            const offset = scrollTop - (scrollHeight - setHeight * 2);
+            const middleSetStart = Math.floor(this.LOOP_MULTIPLIER / 2) * setHeight;
+            column.scrollTop = middleSetStart;
+        }
+    }
+
+    updatePickerValues() {
+        const colFloor = document.getElementById('col-floor');
+        const colColumn = document.getElementById('col-column');
+        const colNumber = document.getElementById('col-number');
+        const resultDisplay = document.getElementById('result-display');
+        
+        if (!colFloor || !colColumn || !colNumber || !resultDisplay) return;
+
+        const selFloorEl = colFloor.querySelector('.selected');
+        if(selFloorEl) this.selectedFloor = selFloorEl.dataset.value;
+
+        const selColEl = colColumn.querySelector('.selected');
+        if(selColEl) this.selectedColumn = selColEl.dataset.value;
+
+        const selNumEl = colNumber.querySelector('.selected');
+        if(selNumEl) this.selectedNumber = selNumEl.dataset.value;
+
+        resultDisplay.innerText = `${this.selectedFloor} - ${this.selectedColumn} - ${this.selectedNumber}`;
+    }
+
+    scrollToValue(column, value, isInfinite, dataLength) {
+        const items = Array.from(column.querySelectorAll('.item'));
+        
+        if (isInfinite) {
+            const middleSetIndex = Math.floor(this.LOOP_MULTIPLIER / 2);
+            
+            let firstMatchIndex = -1;
+            for(let i=0; i<items.length; i++){
+                if(items[i].dataset.value == value) {
+                    firstMatchIndex = i;
+                    break;
+                }
+            }
+            
+            if(firstMatchIndex !== -1) {
+                const realIndex = firstMatchIndex + (middleSetIndex * dataLength);
+                const targetItem = items[realIndex];
+                
+                if(targetItem) {
+                    const scrollPos = targetItem.offsetTop - (column.clientHeight / 2) + (this.ITEM_HEIGHT / 2);
+                    column.scrollTop = scrollPos;
+                    this.handleScroll(column);
+                }
+            }
+            
+        } else {
+            const targetItem = items.find(item => item.dataset.value == value);
+            if (targetItem) {
+                const scrollPos = targetItem.offsetTop - (column.clientHeight / 2) + (this.ITEM_HEIGHT / 2);
+                column.scrollTop = scrollPos;
+                this.handleScroll(column);
+            }
+        }
+    }
+
+    setupPickerColumn(column, isInfinite, dataLength) {
+        column.addEventListener('scroll', () => {
+            window.requestAnimationFrame(() => {
+                this.handleScroll(column);
+                if(isInfinite) this.checkInfiniteLoop(column, dataLength);
+            });
+            
+            clearTimeout(column.scrollTimeout);
+            column.scrollTimeout = setTimeout(() => this.updatePickerValues(), 50);
+        });
+        
+        column.addEventListener('click', (e) => {
+            if(e.target.classList.contains('item')) {
+                const scrollPos = e.target.offsetTop - (column.clientHeight / 2) + (this.ITEM_HEIGHT / 2);
+                column.scrollTo({ top: scrollPos, behavior: 'smooth' });
+            }
+        });
+    }
+
+    initPicker() {
+        const colFloor = document.getElementById('col-floor');
+        const colColumn = document.getElementById('col-column');
+        const colNumber = document.getElementById('col-number');
+        
+        if (!colFloor || !colColumn || !colNumber) return;
+
+        this.initAllPickerLists();
+        
+        this.setupPickerColumn(colFloor, false);
+        this.setupPickerColumn(colColumn, true, this.dataColumns.length);
+        this.setupPickerColumn(colNumber, true, this.dataNumbers.length);
+
+        setTimeout(() => {
+            this.scrollToValue(colFloor, this.selectedFloor, false);
+            this.scrollToValue(colColumn, this.selectedColumn, true, this.dataColumns.length);
+            this.scrollToValue(colNumber, this.selectedNumber, true, this.dataNumbers.length);
+            this.updatePickerValues();
+        }, 50);
+    }
+
+    handlePhotoUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // Dosya boyutu kontrolü (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            this.showNotification('Resim çok büyük! Maksimum 5MB olmalı.', 'error');
+            return;
+        }
+
+        // Dosya tipi kontrolü
+        if (!file.type.startsWith('image/')) {
+            this.showNotification('Lütfen geçerli bir resim dosyası seçin.', 'error');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            this.currentPhoto = e.target.result;
+            this.updateCameraButton();
+            this.showNotification('✓ Resim eklendi', 'success');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    updateCameraButton() {
+        const cameraBtn = document.getElementById('cameraBtn');
+        if (!cameraBtn) return;
+
+        if (this.currentPhoto) {
+            cameraBtn.classList.add('has-photo');
+            cameraBtn.style.backgroundImage = `url(${this.currentPhoto})`;
+        } else {
+            cameraBtn.classList.remove('has-photo');
+            cameraBtn.style.backgroundImage = '';
+        }
+    }
+
+    clearPhoto() {
+        this.currentPhoto = null;
+        this.updateCameraButton();
+        const photoInput = document.getElementById('photoInput');
+        if (photoInput) photoInput.value = '';
+    }
+
+    openPhotoModal(photoUrl) {
+        const modal = document.getElementById('photoModal');
+        const modalImage = document.getElementById('photoModalImage');
+        
+        if (modal && modalImage && photoUrl) {
+            modalImage.src = photoUrl;
+            modal.classList.add('show');
+        }
+    }
+
+    closePhotoModal() {
+        const modal = document.getElementById('photoModal');
+        if (modal) {
+            modal.classList.remove('show');
+        }
+    }
+
     setupEventListeners() {
         // Expand butonu
         document.getElementById('expandBtn').addEventListener('click', () => {
             this.toggleCarContent();
         });
 
-        // Park yeri seçimi
-        document.getElementById('parkingSpot').addEventListener('change', () => {
-            this.onParkingSpotSelected();
-        });
-
         // Araç kaydet butonu
-        document.getElementById('saveParkingBtn').addEventListener('click', () => {
-            this.saveCarLocation();
-        });
+        const saveParkingBtn = document.getElementById('saveParkingBtn');
+        if (saveParkingBtn) {
+            saveParkingBtn.addEventListener('click', () => {
+                this.saveCarLocation();
+            });
+        }
+
+        // Kamera butonu
+        const cameraBtn = document.getElementById('cameraBtn');
+        const photoInput = document.getElementById('photoInput');
+        
+        if (cameraBtn && photoInput) {
+            cameraBtn.addEventListener('click', () => {
+                if (this.currentPhoto) {
+                    // Resim varsa kaldır
+                    this.clearPhoto();
+                    this.showNotification('Resim kaldırıldı', 'info');
+                } else {
+                    // Resim yoksa dosya seçiciyi aç
+                    photoInput.click();
+                }
+            });
+
+            photoInput.addEventListener('change', (e) => {
+                this.handlePhotoUpload(e);
+            });
+        }
 
         // Kategori itemleri
         document.querySelectorAll('.category-item').forEach(item => {
@@ -714,6 +983,30 @@ class CarLocationApp {
                 await this.loadData();
                 this.updateCarUI();
                 this.restoreActiveRoute();
+            }
+        });
+
+        // Photo modal event listeners
+        const photoModal = document.getElementById('photoModal');
+        const photoModalOverlay = photoModal?.querySelector('.photo-modal-overlay');
+        const photoModalClose = photoModal?.querySelector('.photo-modal-close');
+        
+        if (photoModalOverlay) {
+            photoModalOverlay.addEventListener('click', () => {
+                this.closePhotoModal();
+            });
+        }
+        
+        if (photoModalClose) {
+            photoModalClose.addEventListener('click', () => {
+                this.closePhotoModal();
+            });
+        }
+        
+        // ESC tuşu ile modal'ı kapat
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && photoModal?.classList.contains('show')) {
+                this.closePhotoModal();
             }
         });
     }
