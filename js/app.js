@@ -19,7 +19,7 @@ class CarLocationApp {
         this.dataFloors = ["B1", "B2"];
         this.dataColumns = Array.from({length: 16}, (_, i) => String.fromCharCode(65 + i)); // A-P
         this.dataNumbers = Array.from({length: 22}, (_, i) => i); // 0-21
-        this.ITEM_HEIGHT = 44;
+        this.ITEM_HEIGHT = 36;
         this.LOOP_MULTIPLIER = 60;
         this.selectedFloor = "B1";
         this.selectedColumn = "A";
