@@ -354,11 +354,6 @@ class CarLocationApp {
                         <polyline points="12 5 19 12 12 19"></polyline>
                     </svg>
                 </button>
-                <button class="btn-circular btn-qr" data-index="${index}" title="QR ile Paylaş">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm8-2v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4zm13 2h3v3h-3v-3zm-2-2h2v2h-2v-2zm2-3h3v2h-3v-2zm2 5h2v3h-2v-3z"/>
-                    </svg>
-                </button>
                 <button class="btn-circular btn-delete" data-index="${index}" title="Sil">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="3 6 5 6 21 6"></polyline>
@@ -373,7 +368,6 @@ class CarLocationApp {
         // Event listener'ları ekle
         const photoIcon = card.querySelector('.saved-car-photo');
         const navigateBtn = card.querySelector('.btn-navigate');
-        const qrBtn = card.querySelector('.btn-qr');
         const deleteBtn = card.querySelector('.btn-delete');
         
         if (photoIcon) {
@@ -384,54 +378,9 @@ class CarLocationApp {
         }
         
         navigateBtn.addEventListener('click', () => this.navigateToCar(index));
-        qrBtn.addEventListener('click', () => this.shareWithQR(index));
         deleteBtn.addEventListener('click', () => this.deleteCarLocation(index));
         
         return card;
-    }
-
-    async shareWithQR(index) {
-        const parking = this.savedParkings[index];
-        if (!parking) return;
-
-        // Park bilgilerini URL formatında hazırla: "A-0 (B1 Otopark)"
-        const parkInfo = `${parking.parkingSpot} (${parking.floor} Otopark)`;
-        
-        // URL encode et
-        const encodedParkInfo = encodeURIComponent(parkInfo);
-        
-        // URL oluştur (şimdilik placeholder, sonradan gerçek rota URL'i eklenecek)
-        const shareUrl = `https://example.com/parking?spot=${encodedParkInfo}`;
-        
-        // Konum bilgilerini de ekle
-        const lat = parking.location?.lat || '';
-        const lng = parking.location?.lng || '';
-        const fullUrl = `${shareUrl}&lat=${lat}&lng=${lng}`;
-
-        try {
-            // Web Share API ile paylaş
-            if (navigator.share) {
-                await navigator.share({
-                    title: `Park Yeri: ${parking.parkingSpot}`,
-                    text: `Kat ${parking.floor} · ${parking.parkingSpot}\n${parking.note || ''}`,
-                    url: fullUrl
-                });
-                this.showNotification('Park bilgisi paylaşıldı', 'success');
-            } else {
-                // Web Share API yoksa, URL'i kopyala
-                await navigator.clipboard.writeText(fullUrl);
-                this.showNotification('Park yeri bağlantısı panoya kopyalandı', 'success');
-            }
-        } catch (error) {
-            console.error('Paylaşım hatası:', error);
-            // Hata durumunda URL'i kopyala
-            try {
-                await navigator.clipboard.writeText(fullUrl);
-                this.showNotification('Park yeri bağlantısı panoya kopyalandı', 'info');
-            } catch (copyError) {
-                this.showNotification('Paylaşım başarısız oldu', 'error');
-            }
-        }
     }
 
     async saveCarLocation() {
