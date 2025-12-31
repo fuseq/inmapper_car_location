@@ -19,11 +19,13 @@ class CarLocationApp {
         this.dataFloors = ["B1", "B2"];
         this.dataColumns = Array.from({length: 16}, (_, i) => String.fromCharCode(65 + i)); // A-P
         this.dataNumbers = Array.from({length: 22}, (_, i) => i); // 0-21
+        this.dataDurations = ["1 Gün", "2 Gün", "3 Gün", "4 Gün", "5 Gün", "6 Gün", "7 Gün"];
         this.ITEM_HEIGHT = 36;
         this.LOOP_MULTIPLIER = 60;
         this.selectedFloor = "B1";
         this.selectedColumn = "A";
         this.selectedNumber = 0;
+        this.selectedDuration = "1 Gün";
         
         // Sabit başlangıç noktası
         this.startLocation = {
@@ -60,7 +62,7 @@ class CarLocationApp {
             this.setupEventListeners();
             
             // UI'ı güncelle
-            this.updateCarUI();
+            await this.updateCarUI();
             
             // Aktif rotayı geri yükle
             this.restoreActiveRoute();
@@ -120,7 +122,7 @@ class CarLocationApp {
                 } else if (type === 'data_updated') {
                     // Veriler güncellendi
                     await this.loadData();
-                    this.updateCarUI();
+                    await this.updateCarUI();
                 }
             };
         } catch (error) {
@@ -230,15 +232,18 @@ class CarLocationApp {
         }
     }
 
-    updateCarUI() {
+    async updateCarUI() {
         const noCarSaved = document.getElementById('noCarSaved');
         const carSaved = document.getElementById('carSaved');
         const savedCarsList = document.getElementById('savedCarsList');
         
+        // UI güncellenirken süre dolmuş kayıtları temizle
+        await this.cleanExpiredParkings();
+        
         if (this.savedParkings.length > 0) {
-            // Kayıtlı araçlar var
-            noCarSaved.classList.add('hidden');
+            // Kayıtlı araçlar var - listeyi göster, formu gizle
             carSaved.classList.remove('hidden');
+            noCarSaved.classList.add('hidden');
             
             // Listeyi temizle
             savedCarsList.innerHTML = '';
@@ -250,10 +255,19 @@ class CarLocationApp {
             });
             
         } else {
-            // Kayıtlı araç yok
-            noCarSaved.classList.remove('hidden');
+            // Kayıtlı araç yok - formu göster
             carSaved.classList.add('hidden');
+            noCarSaved.classList.remove('hidden');
         }
+    }
+
+    showAddCarForm() {
+        const noCarSaved = document.getElementById('noCarSaved');
+        const carSaved = document.getElementById('carSaved');
+        
+        // Listeyi gizle, formu göster
+        carSaved.classList.add('hidden');
+        noCarSaved.classList.remove('hidden');
     }
 
     createCarCard(parking, index) {
@@ -262,7 +276,8 @@ class CarLocationApp {
         
         const parkingSpot = parking.parkingSpot || '';
         const floor = parking.floor || '';
-        const title = `${parkingSpot} · Kat ${floor}`;
+        // Yeni format: Önce kat, sonra park yeri
+        const title = `Kat ${floor} · ${parkingSpot}`;
         
         // Tarih formatla
         const savedTime = parking.timestamp ? new Date(parking.timestamp) : new Date();
@@ -278,12 +293,43 @@ class CarLocationApp {
             ? `<div class="saved-car-icon saved-car-photo" data-photo="${parking.photo}" style="background-image: url(${parking.photo})"></div>`
             : `<div class="saved-car-icon">🚗</div>`;
         
+        // Kalan süreyi hesapla
+        let durationChip = '';
+        if (parking.duration && parking.timestamp) {
+            const now = new Date();
+            const savedDate = new Date(parking.timestamp);
+            const totalDurationMs = parking.duration * 24 * 60 * 60 * 1000; // Toplam süre (ms)
+            const elapsedMs = now - savedDate; // Geçen süre (ms)
+            const remainingMs = totalDurationMs - elapsedMs; // Kalan süre (ms)
+            
+            if (remainingMs > 0) {
+                // Kalan süreyi saat ve güne çevir
+                const remainingHours = Math.ceil(remainingMs / (1000 * 60 * 60));
+                const remainingDays = Math.floor(remainingHours / 24);
+                
+                let durationText = '';
+                if (remainingHours < 24) {
+                    durationText = `${remainingHours} saat`;
+                } else if (remainingDays === 1) {
+                    durationText = '1 gün';
+                } else {
+                    durationText = `${remainingDays} gün`;
+                }
+                
+                durationChip = `<span class="duration-chip-bottom">${durationText}</span>`;
+            } else {
+                // Süre dolmuş
+                durationChip = `<span class="duration-chip-bottom expired">Süresi doldu</span>`;
+            }
+        }
+        
         card.innerHTML = `
             ${iconHtml}
             <div class="saved-car-info">
                 <div class="saved-car-title">${title}</div>
                 ${parking.note ? `<div class="saved-car-note">${parking.note}</div>` : ''}
                 <div class="saved-car-time">${formattedTime}</div>
+                ${durationChip}
             </div>
             <div class="saved-car-actions">
                 <button class="btn-circular btn-navigate" data-index="${index}" title="Rota Oluştur">
@@ -347,12 +393,16 @@ class CarLocationApp {
             };
         }
 
+        // Süreyi gün sayısına çevir
+        const durationDays = parseInt(this.selectedDuration.split(' ')[0]);
+
         const newParking = {
             parkingSpot: parkingSpot,
             parkingName: parking.name,
             floor: floor,
             note: noteValue,
             photo: this.currentPhoto, // Resmi ekle
+            duration: durationDays, // Gün sayısı
             location: {
                 lat: parking.lat,
                 lng: parking.lng
@@ -364,7 +414,7 @@ class CarLocationApp {
         this.savedParkings.push(newParking);
         
         await this.saveData();
-        this.updateCarUI();
+        await this.updateCarUI();
         
         // Not alanını ve resmi temizle
         if (note) note.value = '';
@@ -456,7 +506,7 @@ class CarLocationApp {
         }
         
         await this.saveData();
-        this.updateCarUI();
+        await this.updateCarUI();
         this.showNotification('Araç konumu silindi', 'success');
     }
 
@@ -505,6 +555,8 @@ class CarLocationApp {
 
             request.onsuccess = () => {
                 this.savedParkings = request.result || [];
+                // Süre dolmuş kayıtları temizle
+                this.cleanExpiredParkings();
                 resolve();
             };
 
@@ -514,6 +566,45 @@ class CarLocationApp {
                 reject(request.error);
             };
         });
+    }
+
+    async cleanExpiredParkings() {
+        const now = new Date();
+        let hasExpired = false;
+        
+        // Süre dolmuş kayıtları filtrele
+        this.savedParkings = this.savedParkings.filter(parking => {
+            if (!parking.duration || !parking.timestamp) {
+                return true; // Süre bilgisi yoksa sakla
+            }
+            
+            const savedDate = new Date(parking.timestamp);
+            const totalDurationMs = parking.duration * 24 * 60 * 60 * 1000;
+            const elapsedMs = now - savedDate;
+            const remainingMs = totalDurationMs - elapsedMs;
+            
+            if (remainingMs <= 0) {
+                hasExpired = true;
+                // Eğer bu kayıt aktif rota ise, rotayı temizle
+                const index = this.savedParkings.indexOf(parking);
+                if (this.activeRouteIndex === index) {
+                    if (this.routeLine) {
+                        this.map.removeLayer(this.routeLine);
+                        this.routeLine = null;
+                    }
+                    this.activeRouteIndex = null;
+                }
+                return false; // Sil
+            }
+            
+            return true; // Sakla
+        });
+        
+        // Eğer süre dolmuş kayıt varsa, veritabanını güncelle
+        if (hasExpired) {
+            await this.saveData();
+            this.showNotification('Süresi dolmuş park kayıtları silindi', 'info');
+        }
     }
 
     async migrateFromLocalStorage() {
@@ -676,6 +767,7 @@ class CarLocationApp {
         this.initNormalList('content-floor', this.dataFloors);
         this.initInfiniteList('content-column', this.dataColumns);
         this.initInfiniteList('content-number', this.dataNumbers);
+        this.initNormalList('content-duration', this.dataDurations);
     }
 
     handleScroll(column) {
@@ -728,6 +820,7 @@ class CarLocationApp {
         const colFloor = document.getElementById('col-floor');
         const colColumn = document.getElementById('col-column');
         const colNumber = document.getElementById('col-number');
+        const colDuration = document.getElementById('col-duration');
         const resultDisplay = document.getElementById('result-display');
         
         if (!colFloor || !colColumn || !colNumber || !resultDisplay) return;
@@ -740,6 +833,11 @@ class CarLocationApp {
 
         const selNumEl = colNumber.querySelector('.selected');
         if(selNumEl) this.selectedNumber = selNumEl.dataset.value;
+
+        if(colDuration) {
+            const selDurEl = colDuration.querySelector('.selected');
+            if(selDurEl) this.selectedDuration = selDurEl.dataset.value;
+        }
 
         resultDisplay.innerText = `${this.selectedFloor} - ${this.selectedColumn} - ${this.selectedNumber}`;
     }
@@ -802,6 +900,7 @@ class CarLocationApp {
         const colFloor = document.getElementById('col-floor');
         const colColumn = document.getElementById('col-column');
         const colNumber = document.getElementById('col-number');
+        const colDuration = document.getElementById('col-duration');
         
         if (!colFloor || !colColumn || !colNumber) return;
 
@@ -810,11 +909,20 @@ class CarLocationApp {
         this.setupPickerColumn(colFloor, false);
         this.setupPickerColumn(colColumn, true, this.dataColumns.length);
         this.setupPickerColumn(colNumber, true, this.dataNumbers.length);
+        
+        if (colDuration) {
+            this.setupPickerColumn(colDuration, false);
+        }
 
         setTimeout(() => {
             this.scrollToValue(colFloor, this.selectedFloor, false);
             this.scrollToValue(colColumn, this.selectedColumn, true, this.dataColumns.length);
             this.scrollToValue(colNumber, this.selectedNumber, true, this.dataNumbers.length);
+            
+            if (colDuration) {
+                this.scrollToValue(colDuration, this.selectedDuration, false);
+            }
+            
             this.updatePickerValues();
         }, 50);
     }
@@ -939,6 +1047,14 @@ class CarLocationApp {
             });
         }
 
+        // Yeni kayıt ekle butonu
+        const addNewCarBtn = document.getElementById('addNewCarBtn');
+        if (addNewCarBtn) {
+            addNewCarBtn.addEventListener('click', () => {
+                this.showAddCarForm();
+            });
+        }
+
         // Kamera butonu
         const cameraBtn = document.getElementById('cameraBtn');
         const photoInput = document.getElementById('photoInput');
@@ -1025,7 +1141,7 @@ class CarLocationApp {
         document.addEventListener('visibilitychange', async () => {
             if (!document.hidden) {
                 await this.loadData();
-                this.updateCarUI();
+                await this.updateCarUI();
                 this.restoreActiveRoute();
             }
         });

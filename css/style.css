@@ -87,7 +87,7 @@ body {
 .bottom-sheet-content {
     padding: 0 20px 20px 20px;
     overflow-y: auto;
-    max-height: calc(100vh - 120px);
+    max-height: calc(100vh - 80px);
 }
 
 /* Arama Kutusu */
@@ -226,6 +226,9 @@ body {
 /* Araç Kayıt Bölümü */
 .car-section {
     animation: fadeIn 0.3s ease;
+    min-height: 350px;
+    max-height: 350px;
+    overflow: hidden; /* Scroll'u tamamen kapat */
 }
 
 .car-section.hidden {
@@ -345,19 +348,78 @@ body {
 .saved-cars-pane {
     padding: 0;
     background: transparent;
+    position: relative;
+    min-height: 350px;
+    max-height: 350px;
+    overflow: hidden;
 }
 
 .saved-cars-pane .picker-header {
-    margin-bottom: 14px;
+    margin-bottom: 12px;
     padding: 0 20px;
 }
 
-/* Kayıtlı Araçlar Listesi */
-#savedCarsList {
+/* Add New Button - Sağ Üst Köşe */
+.btn-add-new {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 4px 10px;
+    height: 26px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    transition: all 0.2s ease;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.btn-add-new:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.btn-add-new:active {
+    transform: scale(0.95);
+}
+
+/* Kayıtlı Araçlar Listesi - Scrollable */
+.saved-cars-scroll {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 0;
+    gap: 0;
+    padding: 0 4px 0 0; /* Sağda scrollbar için boşluk */
+    max-height: 280px; /* 3 kart rahat sığacak yükseklik */
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Scrollbar Styling */
+.saved-cars-scroll::-webkit-scrollbar {
+    width: 3px;
+}
+
+.saved-cars-scroll::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 4px 0; /* Üst ve alt boşluk */
+}
+
+.saved-cars-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 2px;
+}
+
+.saved-cars-scroll::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }
 
 /* Kayıtlı Araç Kartı */
@@ -365,14 +427,24 @@ body {
     display: flex;
     gap: 14px;
     align-items: center;
-    padding: 14px 20px;
+    padding: 10px 20px;
     background: #f8fafc;
     border: none;
-    border-radius: 10px;
+    border-radius: 0;
     transition: all 0.2s ease;
-    width: calc(100% + 40px);
-    margin-left: -20px;
-    margin-right: -20px;
+    width: 100%;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.saved-car-card:first-child {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.saved-car-card:last-child {
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-bottom: none;
 }
 
 .saved-car-card:hover {
@@ -439,6 +511,24 @@ body {
     color: var(--text-primary);
     margin-bottom: 6px;
     letter-spacing: -0.2px;
+}
+
+/* Duration Chip (Bottom) */
+.duration-chip-bottom {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0;
+    margin-top: 4px;
+}
+
+.duration-chip-bottom.expired {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 }
 
 .saved-car-note {
@@ -570,11 +660,9 @@ body {
     }
 
     .saved-car-card {
-        padding: 12px 20px;
+        padding: 8px 20px;
         gap: 12px;
-        width: calc(100% + 40px);
-        margin-left: -20px;
-        margin-right: -20px;
+        width: 100%;
     }
 
     .saved-car-title {
@@ -829,6 +917,23 @@ body {
     color: #000;
 }
 
+/* Picker Container - Yan Yana */
+.picker-container {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.duration-picker-wrapper {
+    flex-shrink: 0;
+    width: 70px;
+}
+
+.parking-picker-wrapper {
+    flex: 1;
+    min-width: 0;
+}
+
 .picker-labels {
     display: flex;
     justify-content: space-around;
@@ -845,6 +950,16 @@ body {
     text-align: center; 
 }
 
+.picker-labels-single {
+    text-align: center;
+    margin-bottom: 3px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #8e8e93;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
 /* Ana Picker Kutusu */
 .date-picker {
     display: flex;
@@ -855,7 +970,34 @@ body {
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%);
 }
 
+/* Küçük Süre Picker */
+.duration-picker {
+    display: flex;
+    position: relative;
+    height: calc(var(--item-height) * var(--visible-items));
+    overflow: hidden;
+    mask-image: linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%);
+}
+
+.column-small {
+    width: 100%;
+}
+
 .highlight-bar {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: var(--item-height);
+    background-color: var(--highlight-line-color);
+    transform: translateY(-50%);
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.highlight-bar-small {
     position: absolute;
     top: 50%;
     left: 0;

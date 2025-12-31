@@ -71,7 +71,24 @@
 
                 <!-- Araç Kayıt İçeriği -->
                 <div id="carContent" class="car-content">
-                    <!-- Kayıt Yok Durumu -->
+                    <!-- Kayıtlı Araçlar -->
+                    <div id="carSaved" class="car-section hidden">
+                        <div class="cupertino-pane saved-cars-pane">
+                            <button id="addNewCarBtn" class="btn-add-new" title="Yeni Kayıt Ekle">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                <span>Ekle</span>
+                            </button>
+                            <div class="picker-header">
+                                <span class="note-header">Kayıtlı Araçlar</span>
+                            </div>
+                            <div id="savedCarsList" class="saved-cars-scroll"></div>
+                        </div>
+                    </div>
+
+                    <!-- Kayıt Formu -->
                     <div id="noCarSaved" class="car-section">
                         <div class="section-header">
                             <h3>Araç Park Yeri Kaydet</h3>
@@ -83,28 +100,46 @@
                                 <span id="result-display">Park Yeri Seç</span>
                             </div>
 
-                            <div class="picker-labels">
-                                <span>Kat</span>
-                                <span>Sütun</span>
-                                <span>Numara</span>
-                            </div>
-                            
-                            <div class="date-picker">
-                                <div class="highlight-bar"></div>
-                                
-                                <!-- Kat (Normal - Finite) -->
-                                <div class="column" id="col-floor">
-                                    <div class="column-content" id="content-floor"></div>
+                            <div class="picker-container">
+                                <!-- Park Yeri Picker (Sol) -->
+                                <div class="parking-picker-wrapper">
+                                    <div class="picker-labels">
+                                        <span>Kat</span>
+                                        <span>Sütun</span>
+                                        <span>Numara</span>
+                                    </div>
+                                    
+                                    <div class="date-picker">
+                                        <div class="highlight-bar"></div>
+                                        
+                                        <!-- Kat (Normal - Finite) -->
+                                        <div class="column" id="col-floor">
+                                            <div class="column-content" id="content-floor"></div>
+                                        </div>
+                                        
+                                        <!-- Sütun (Infinite) -->
+                                        <div class="column" id="col-column">
+                                            <div class="column-content" id="content-column"></div>
+                                        </div>
+                                        
+                                        <!-- Numara (Infinite) -->
+                                        <div class="column" id="col-number">
+                                            <div class="column-content" id="content-number"></div>
+                                        </div>
+                                    </div>
                                 </div>
-                                
-                                <!-- Sütun (Infinite) -->
-                                <div class="column" id="col-column">
-                                    <div class="column-content" id="content-column"></div>
-                                </div>
-                                
-                                <!-- Numara (Infinite) -->
-                                <div class="column" id="col-number">
-                                    <div class="column-content" id="content-number"></div>
+
+                                <!-- Süre Picker (Sağ) -->
+                                <div class="duration-picker-wrapper">
+                                    <div class="picker-labels-single">
+                                        <span>Süre</span>
+                                    </div>
+                                    <div class="duration-picker">
+                                        <div class="highlight-bar-small"></div>
+                                        <div class="column column-small" id="col-duration">
+                                            <div class="column-content" id="content-duration"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -131,16 +166,6 @@
                             </svg>
                             Kaydet
                         </button>
-                    </div>
-
-                    <!-- Kayıtlı Araçlar -->
-                    <div id="carSaved" class="car-section hidden">
-                        <div class="cupertino-pane saved-cars-pane">
-                            <div class="picker-header">
-                                <span class="note-header">Kayıtlı Araçlar</span>
-                            </div>
-                            <div id="savedCarsList"></div>
-                        </div>
                     </div>
                 </div>
             </div>
