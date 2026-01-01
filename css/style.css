@@ -85,9 +85,9 @@ body {
 
 /* Bottom Sheet Content */
 .bottom-sheet-content {
-    padding: 0 20px 20px 20px;
+    padding: 0 20px 30px 20px;
     overflow-y: auto;
-    max-height: calc(100vh - 80px);
+    max-height: calc(100vh - 60px);
 }
 
 /* Arama Kutusu */
@@ -119,93 +119,6 @@ body {
 
 .expand-btn-external:active {
     transform: translateY(-50%) scale(0.95);
-}
-
-/* Spotlight Overlay (Delikli Karanlık Katman) */
-#spotlightOverlay {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 200vmax;
-    height: 200vmax;
-    border-radius: 50%;
-    box-shadow: 0 0 0 0px rgba(0, 0, 0, 0);
-    pointer-events: none;
-    z-index: 10001;
-    transition: 
-        box-shadow 1.2s ease,
-        width 1s cubic-bezier(0.22, 1, 0.36, 1),
-        height 1s cubic-bezier(0.22, 1, 0.36, 1),
-        top 1s cubic-bezier(0.22, 1, 0.36, 1),
-        left 1s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-#spotlightOverlay.focus {
-    box-shadow: 0 0 0 5000px rgba(0, 0, 0, 0.8);
-}
-
-/* Tutorial Bubble */
-#tutorialBubble {
-    position: fixed;
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    width: 250px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    z-index: 10002;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.5s ease, transform 0.5s ease;
-    pointer-events: none;
-}
-
-#tutorialBubble.visible {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
-}
-
-#tutorialBubble h3 {
-    margin: 0 0 8px 0;
-    font-size: 16px;
-    color: #333;
-    font-weight: 600;
-}
-
-#tutorialBubble p {
-    margin: 0 0 15px 0;
-    font-size: 14px;
-    color: #666;
-    line-height: 1.5;
-}
-
-.btn-tutorial-close {
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 13px;
-    float: right;
-    font-weight: 500;
-    transition: background 0.2s;
-}
-
-.btn-tutorial-close:hover {
-    background: #1d4ed8;
-}
-
-#tutorialBubble::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    right: -8px;
-    transform: translateY(-50%);
-    border-top: 8px solid transparent;
-    border-bottom: 8px solid transparent;
-    border-left: 8px solid white;
 }
 
 .expand-btn-external svg {
@@ -302,7 +215,7 @@ body {
 }
 
 .car-content.expanded {
-    max-height: 1000px;
+    max-height: 2000px;
     opacity: 1;
     margin-top: 8px;
 }
@@ -310,9 +223,9 @@ body {
 /* Araç Kayıt Bölümü */
 .car-section {
     animation: fadeIn 0.3s ease;
-    min-height: 380px;
-    max-height: 380px;
-    overflow: hidden; /* Scroll'u tamamen kapat */
+    min-height: auto;
+    max-height: none;
+    overflow: visible;
 }
 
 .car-section.hidden {
@@ -469,13 +382,14 @@ body {
     padding: 0;
     background: transparent;
     position: relative;
-    min-height: 380px;
-    max-height: 380px;
-    overflow: hidden;
+    min-height: auto;
+    max-height: none;
+    overflow: visible;
+    margin-top: 16px;
 }
 
 .saved-cars-pane .picker-header {
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     padding: 0 20px;
 }
 
@@ -513,7 +427,7 @@ body {
     flex-direction: column;
     gap: 0;
     padding: 0 4px 0 0; /* Sağda scrollbar için boşluk */
-    max-height: 280px; /* 3 kart rahat sığacak yükseklik */
+    max-height: 260px;
     overflow-y: auto;
     overflow-x: hidden;
 }
@@ -542,7 +456,7 @@ body {
     display: flex;
     gap: 12px;
     align-items: center;
-    padding: 10px 16px;
+    padding: 10px 14px;
     background: #f8fafc;
     border: none;
     border-radius: 0;
@@ -564,14 +478,14 @@ body {
 
 
 .saved-car-icon {
-    width: 70px;
-    height: 70px;
+    width: 54px;
+    height: 54px;
     background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-    border-radius: 12px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32px;
+    font-size: 24px;
     flex-shrink: 0;
 }
 
@@ -621,9 +535,9 @@ body {
     font-size: 14px;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     letter-spacing: -0.2px;
-    line-height: 1.3;
+    white-space: nowrap;
 }
 
 /* Duration Chip (Bottom) */
@@ -665,14 +579,14 @@ body {
 .saved-car-actions {
     display: flex;
     flex-direction: row;
-    gap: 8px;
+    gap: 6px;
     flex-shrink: 0;
 }
 
 .btn-circular {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -767,19 +681,19 @@ body {
     }
 
     .saved-car-card {
-        padding: 8px 20px;
-        gap: 12px;
+        padding: 8px 10px;
+        gap: 8px;
         width: 100%;
     }
 
     .saved-car-title {
-        font-size: 15px;
+        font-size: 13px;
     }
 
     .saved-car-icon {
-        width: 64px;
-        height: 64px;
-        font-size: 28px;
+        width: 48px;
+        height: 48px;
+        font-size: 22px;
     }
 
     .saved-car-note {
@@ -791,13 +705,13 @@ body {
     }
 
     .btn-circular {
-        width: 38px;
-        height: 38px;
+        width: 34px;
+        height: 34px;
     }
 
     .btn-circular svg {
-        width: 18px;
-        height: 18px;
+        width: 16px;
+        height: 16px;
     }
 
     .bottom-sheet {
@@ -1233,4 +1147,118 @@ body {
     justify-content: center;
     font-size: 12px;
     font-weight: bold;
+}
+
+/* --- SPOTLIGHT & TOUR STYLES --- */
+#spotlight-overlay {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200vmax;
+    height: 200vmax;
+    border-radius: 50%;
+    box-shadow: 0 0 0 0px rgba(0, 0, 0, 0);
+    pointer-events: none;
+    z-index: 9998;
+    transition: 
+        box-shadow 0.8s ease,
+        width 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+        height 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+        top 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+        left 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#spotlight-overlay.focus {
+    box-shadow: 0 0 0 5000px rgba(0, 0, 0, 0.75);
+}
+
+/* Tour Info Bubble - Sol Tarafta */
+#tour-bubble {
+    position: fixed;
+    background: white;
+    padding: 16px 18px;
+    border-radius: 14px;
+    width: 220px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    z-index: 10000;
+    opacity: 0;
+    transform: translateX(10px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    pointer-events: none;
+}
+
+#tour-bubble.visible {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+}
+
+#tour-bubble h3 {
+    margin: 0 0 8px 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#tour-bubble p {
+    margin: 0 0 14px 0;
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+#tour-bubble .btn-tour-close {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    width: 100%;
+    transition: all 0.2s ease;
+}
+
+#tour-bubble .btn-tour-close:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+
+#tour-bubble .btn-tour-close:active {
+    transform: scale(0.98);
+}
+
+/* Ok işareti - Sağ tarafta (balon solda olduğu için) */
+#tour-bubble::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -8px;
+    transform: translateY(-50%);
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 10px solid white;
+}
+
+/* Highlight ring animation on button */
+.expand-btn-external.highlighted {
+    z-index: 9999 !important;
+    animation: pulse-ring 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-ring {
+    0% {
+        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7), 0 4px 12px rgba(37, 99, 235, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 12px rgba(37, 99, 235, 0), 0 4px 12px rgba(37, 99, 235, 0.4);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0), 0 4px 12px rgba(37, 99, 235, 0.4);
+    }
 }

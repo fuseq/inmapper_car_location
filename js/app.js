@@ -24,6 +24,7 @@ class CarLocationApp {
         this.selectedFloor = "B1";
         this.selectedColumn = "A";
         this.selectedNumber = 0;
+        this.selectedDuration = 1; // Default 1 gün
         
         // Sabit başlangıç noktası
         this.startLocation = {
@@ -56,9 +57,6 @@ class CarLocationApp {
             // Verileri yükle
             await this.loadData();
             
-            // Süresi dolmuş kayıtları temizle
-            await this.cleanExpiredParkings();
-            
             // Event listener'ları ekle
             this.setupEventListeners();
             
@@ -71,87 +69,13 @@ class CarLocationApp {
             // iOS Picker'ı başlat
             this.initPicker();
             
-            // İlk açılış tutorial'ını göster
-            this.showFirstTimeTutorial();
-            
-            // Her 1 dakikada bir süresi dolmuş kayıtları kontrol et
-            this.expirationCheckInterval = setInterval(async () => {
-                await this.cleanExpiredParkings();
-                await this.updateCarUI();
-            }, 60000); // 60000ms = 1 dakika
+            // İlk kez ziyarette tour'u göster
+            this.checkAndShowTour();
             
         } catch (error) {
             console.error('Başlatma hatası:', error);
             this.showNotification('Uygulama başlatılırken hata oluştu', 'error');
         }
-    }
-
-    showFirstTimeTutorial() {
-        // localStorage'da tutorial gösterildi mi kontrol et
-        const tutorialShown = localStorage.getItem('tutorialShown');
-        
-        if (!tutorialShown) {
-            // 1 saniye bekle, sonra tutorial göster
-            setTimeout(() => {
-                this.runSpotlightEffect();
-            }, 1000);
-        }
-    }
-
-    runSpotlightEffect() {
-        const spotlight = document.getElementById('spotlightOverlay');
-        const targetBtn = document.getElementById('expandBtn');
-        const bubble = document.getElementById('tutorialBubble');
-
-        if (!spotlight || !targetBtn || !bubble) return;
-
-        const rect = targetBtn.getBoundingClientRect();
-
-        // 1. Spotlight'ı hedefin üzerine ve boyutuna getir
-        const padding = 20;
-        const size = Math.max(rect.width, rect.height) + padding;
-        
-        const targetTop = rect.top + rect.height / 2;
-        const targetLeft = rect.left + rect.width / 2;
-
-        spotlight.style.width = size + 'px';
-        spotlight.style.height = size + 'px';
-        spotlight.style.top = targetTop + 'px';
-        spotlight.style.left = targetLeft + 'px';
-
-        // 2. Efekti başlat (Gölgeyi koyu yap)
-        spotlight.classList.add('focus');
-
-        // 3. Baloncuğu konumlandır ve göster
-        setTimeout(() => {
-            // Baloncuğu butonun soluna hizala
-            const bubbleTop = rect.top + (rect.height / 2) - (bubble.offsetHeight / 2);
-            const bubbleLeft = rect.left - bubble.offsetWidth - 20;
-
-            bubble.style.top = bubbleTop + 'px';
-            bubble.style.left = bubbleLeft + 'px';
-            
-            // Baloncuğu görünür yap
-            bubble.classList.add('visible');
-        }, 600);
-    }
-
-    closeTutorial() {
-        const spotlight = document.getElementById('spotlightOverlay');
-        const bubble = document.getElementById('tutorialBubble');
-        
-        if (!spotlight || !bubble) return;
-        
-        // Baloncuğu gizle
-        bubble.classList.remove('visible');
-        
-        // Spotlight'ı kaldır
-        spotlight.classList.remove('focus');
-        spotlight.style.width = '200vmax';
-        spotlight.style.height = '200vmax';
-        
-        // Tutorial gösterildi olarak işaretle
-        localStorage.setItem('tutorialShown', 'true');
     }
 
     initIndexedDB() {
@@ -387,12 +311,43 @@ class CarLocationApp {
             ? `<div class="saved-car-icon saved-car-photo" data-photo="${parking.photo}" style="background-image: url(${parking.photo})"></div>`
             : `<div class="saved-car-icon">🚗</div>`;
         
+        // Kalan süreyi hesapla
+        let durationChip = '';
+        if (parking.duration && parking.timestamp) {
+            const now = new Date();
+            const savedDate = new Date(parking.timestamp);
+            const totalDurationMs = parking.duration * 24 * 60 * 60 * 1000; // Toplam süre (ms)
+            const elapsedMs = now - savedDate; // Geçen süre (ms)
+            const remainingMs = totalDurationMs - elapsedMs; // Kalan süre (ms)
+            
+            if (remainingMs > 0) {
+                // Kalan süreyi saat ve güne çevir
+                const remainingHours = Math.ceil(remainingMs / (1000 * 60 * 60));
+                const remainingDays = Math.floor(remainingHours / 24);
+                
+                let durationText = '';
+                if (remainingHours < 24) {
+                    durationText = `${remainingHours} saat`;
+                } else if (remainingDays === 1) {
+                    durationText = '1 gün';
+                } else {
+                    durationText = `${remainingDays} gün`;
+                }
+                
+                durationChip = `<span class="duration-chip-bottom">${durationText}</span>`;
+            } else {
+                // Süre dolmuş
+                durationChip = `<span class="duration-chip-bottom expired">Süresi doldu</span>`;
+            }
+        }
+        
         card.innerHTML = `
             ${iconHtml}
             <div class="saved-car-info">
                 <div class="saved-car-title">${title}</div>
                 ${parking.note ? `<div class="saved-car-note">${parking.note}</div>` : ''}
                 <div class="saved-car-time">${formattedTime}</div>
+                ${durationChip}
             </div>
             <div class="saved-car-actions">
                 <button class="btn-circular btn-navigate" data-index="${index}" title="Rota Oluştur">
@@ -503,8 +458,8 @@ class CarLocationApp {
             };
         }
 
-        // Otomatik silme için varsayılan süre: 1 gün
-        const defaultDurationDays = 1;
+        // Süre default 1 gün
+        const durationDays = this.selectedDuration;
 
         const newParking = {
             parkingSpot: parkingSpot,
@@ -512,7 +467,7 @@ class CarLocationApp {
             floor: floor,
             note: noteValue,
             photo: this.currentPhoto, // Resmi ekle
-            duration: defaultDurationDays, // Otomatik 1 gün
+            duration: durationDays, // Gün sayısı
             location: {
                 lat: parking.lat,
                 lng: parking.lng
@@ -1016,6 +971,7 @@ class CarLocationApp {
             this.scrollToValue(colFloor, this.selectedFloor, false);
             this.scrollToValue(colColumn, this.selectedColumn, true, this.dataColumns.length);
             this.scrollToValue(colNumber, this.selectedNumber, true, this.dataNumbers.length);
+            
             this.updatePickerValues();
         }, 50);
     }
@@ -1249,7 +1205,6 @@ class CarLocationApp {
         document.addEventListener('visibilitychange', async () => {
             if (!document.hidden) {
                 await this.loadData();
-                await this.cleanExpiredParkings();
                 await this.updateCarUI();
                 this.restoreActiveRoute();
             }
@@ -1289,10 +1244,88 @@ class CarLocationApp {
             notification.classList.remove('show');
         }, 3000);
     }
+
+    /* --- TOUR / SPOTLIGHT FONKSİYONLARI --- */
+    
+    checkAndShowTour() {
+        const tourSeen = localStorage.getItem('tourSeen');
+        if (!tourSeen) {
+            // İlk kez ziyaret - tour'u göster
+            setTimeout(() => {
+                this.showTour();
+            }, 1000);
+        }
+    }
+
+    showTour() {
+        const spotlight = document.getElementById('spotlight-overlay');
+        const expandBtn = document.getElementById('expandBtn');
+        const bubble = document.getElementById('tour-bubble');
+        
+        if (!spotlight || !expandBtn || !bubble) return;
+
+        const rect = expandBtn.getBoundingClientRect();
+        
+        // Spotlight'ı butonun üzerine konumlandır
+        const padding = 20;
+        const size = Math.max(rect.width, rect.height) + padding;
+        const targetTop = rect.top + rect.height / 2;
+        const targetLeft = rect.left + rect.width / 2;
+
+        spotlight.style.width = size + 'px';
+        spotlight.style.height = size + 'px';
+        spotlight.style.top = targetTop + 'px';
+        spotlight.style.left = targetLeft + 'px';
+
+        // Spotlight efektini başlat
+        spotlight.classList.add('focus');
+        
+        // Butona highlight animasyonu ekle
+        expandBtn.classList.add('highlighted');
+
+        // Baloncuğu konumlandır (butonun solunda)
+        setTimeout(() => {
+            const bubbleWidth = bubble.offsetWidth;
+            const bubbleHeight = bubble.offsetHeight;
+            
+            // Butonun soluna 15px boşluk bırakarak konumlandır
+            const bubbleLeft = rect.left - bubbleWidth - 15;
+            // Dikey olarak butonla ortala
+            const bubbleTop = rect.top + (rect.height / 2) - (bubbleHeight / 2);
+
+            bubble.style.left = bubbleLeft + 'px';
+            bubble.style.top = bubbleTop + 'px';
+            
+            bubble.classList.add('visible');
+        }, 400);
+    }
+
+    closeTour() {
+        const spotlight = document.getElementById('spotlight-overlay');
+        const expandBtn = document.getElementById('expandBtn');
+        const bubble = document.getElementById('tour-bubble');
+        
+        if (!spotlight || !bubble) return;
+
+        // Baloncuğu gizle
+        bubble.classList.remove('visible');
+        
+        // Butondan highlight'ı kaldır
+        if (expandBtn) {
+            expandBtn.classList.remove('highlighted');
+        }
+        
+        // Spotlight'ı kaldır
+        spotlight.classList.remove('focus');
+        spotlight.style.width = '200vmax';
+        spotlight.style.height = '200vmax';
+        
+        // Tour'un görüldüğünü kaydet
+        localStorage.setItem('tourSeen', 'true');
+    }
 }
 
 // Uygulamayı başlat
 document.addEventListener('DOMContentLoaded', () => {
     window.carLocationApp = new CarLocationApp();
-    window.parkingApp = window.carLocationApp; // Tutorial için alias
 });

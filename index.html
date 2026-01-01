@@ -102,7 +102,7 @@
                             </div>
 
                             <div class="picker-container">
-                                <!-- Park Yeri Picker -->
+                                <!-- Park Yeri Picker (Sol) -->
                                 <div class="parking-picker-wrapper">
                                     <div class="picker-labels">
                                         <span>Kat</span>
@@ -129,6 +129,7 @@
                                         </div>
                                     </div>
                                 </div>
+
                             </div>
                         </div>
 
@@ -163,6 +164,16 @@
     <!-- Notification -->
     <div id="notification" class="notification"></div>
 
+    <!-- Spotlight Overlay -->
+    <div id="spotlight-overlay"></div>
+
+    <!-- Tour Bubble -->
+    <div id="tour-bubble">
+        <h3>🚗 Araç Kaydı</h3>
+        <p>Aracınızın park yerini kaydetmek için bu butona tıklayın.</p>
+        <button class="btn-tour-close" onclick="window.carLocationApp.closeTour()">Anladım!</button>
+    </div>
+
     <!-- Photo Modal -->
     <div id="photoModal" class="photo-modal">
         <div class="photo-modal-overlay"></div>
@@ -172,24 +183,8 @@
         </div>
     </div>
 
-    <!-- Expand Button -->
-    <button id="expandBtn" class="expand-btn-external">
-        <i class="fas fa-car"></i>
-    </button>
-
-    <!-- Spotlight Overlay -->
-    <div id="spotlightOverlay"></div>
-
-    <!-- Tutorial Bubble -->
-    <div id="tutorialBubble">
-        <h3>Araç Kaydet</h3>
-        <p>Park yerinizi kaydetmek ve daha sonra kolayca bulabilmek için buraya tıklayın.</p>
-        <button class="btn-tutorial-close" onclick="window.carLocationApp.closeTutorial()">Anladım</button>
-    </div>
-
     <!-- Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
-
