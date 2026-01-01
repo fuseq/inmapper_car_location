@@ -102,7 +102,7 @@
                             </div>
 
                             <div class="picker-container">
-                                <!-- Park Yeri Picker (Sol) -->
+                                <!-- Park Yeri Picker -->
                                 <div class="parking-picker-wrapper">
                                     <div class="picker-labels">
                                         <span>Kat</span>
@@ -126,19 +126,6 @@
                                         <!-- Numara (Infinite) -->
                                         <div class="column" id="col-number">
                                             <div class="column-content" id="content-number"></div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Süre Picker (Sağ) -->
-                                <div class="duration-picker-wrapper">
-                                    <div class="picker-labels-single">
-                                        <span>Süre</span>
-                                    </div>
-                                    <div class="duration-picker">
-                                        <div class="highlight-bar-small"></div>
-                                        <div class="column column-small" id="col-duration">
-                                            <div class="column-content" id="content-duration"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -183,6 +170,21 @@
             <button class="photo-modal-close">&times;</button>
             <img id="photoModalImage" src="" alt="Park Yeri Fotoğrafı">
         </div>
+    </div>
+
+    <!-- Expand Button -->
+    <button id="expandBtn" class="expand-btn-external">
+        <i class="fas fa-car"></i>
+    </button>
+
+    <!-- Spotlight Overlay -->
+    <div id="spotlightOverlay"></div>
+
+    <!-- Tutorial Bubble -->
+    <div id="tutorialBubble">
+        <h3>Araç Kaydet</h3>
+        <p>Park yerinizi kaydetmek ve daha sonra kolayca bulabilmek için buraya tıklayın.</p>
+        <button class="btn-tutorial-close" onclick="window.carLocationApp.closeTutorial()">Anladım</button>
     </div>
 
     <!-- Scripts -->
