@@ -341,11 +341,22 @@ class CarLocationApp {
             }
         }
         
+        // Not uzunluğunu kontrol et (20 karakterden uzunsa kayar yazı - infinite loop)
+        let noteHtml = '';
+        if (parking.note) {
+            if (parking.note.length > 20) {
+                // Infinite loop için yazıyı iki kez kopyala
+                noteHtml = `<div class="saved-car-note scrolling"><div class="marquee-wrapper"><span class="marquee-text">${parking.note}</span><span class="marquee-text">${parking.note}</span></div></div>`;
+            } else {
+                noteHtml = `<div class="saved-car-note"><span class="marquee-text">${parking.note}</span></div>`;
+            }
+        }
+        
         card.innerHTML = `
             ${iconHtml}
             <div class="saved-car-info">
                 <div class="saved-car-title">${title}</div>
-                ${parking.note ? `<div class="saved-car-note">${parking.note}</div>` : ''}
+                ${noteHtml}
                 <div class="saved-car-time">${formattedTime}</div>
                 ${durationChip}
             </div>
@@ -1204,9 +1215,15 @@ class CarLocationApp {
         // Sayfa görünür olduğunda
         document.addEventListener('visibilitychange', async () => {
             if (!document.hidden) {
-                await this.loadData();
-                await this.updateCarUI();
-                this.restoreActiveRoute();
+                // Form açıksa (kayıt ekranındaysa) UI'ı güncelleme
+                const noCarSaved = document.getElementById('noCarSaved');
+                const isFormOpen = noCarSaved && !noCarSaved.classList.contains('hidden');
+                
+                if (!isFormOpen) {
+                    await this.loadData();
+                    await this.updateCarUI();
+                    this.restoreActiveRoute();
+                }
             }
         });
 
