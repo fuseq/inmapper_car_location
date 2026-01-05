@@ -403,9 +403,8 @@ class CarLocationApp {
         const parkingSpot = parking.parkingSpot || '';
         const floor = parking.floor || '';
         const colorInfo = parking.color;
-        // Yeni format: Önce kat, sonra park yeri, sonra renk
-        const colorText = colorInfo ? ` · ${colorInfo.name}` : '';
-        const title = `Kat ${floor} · ${parkingSpot}${colorText}`;
+        // Format: Kat ve park yeri (renk chip'te gösterilecek)
+        const title = `Kat ${floor} · ${parkingSpot}`;
         
         // Tarih formatla
         const savedTime = parking.timestamp ? new Date(parking.timestamp) : new Date();
@@ -436,34 +435,10 @@ class CarLocationApp {
                 </svg>
                </div>`;
         
-        // Kalan süreyi hesapla
-        let durationChip = '';
-        if (parking.duration && parking.timestamp) {
-            const now = new Date();
-            const savedDate = new Date(parking.timestamp);
-            const totalDurationMs = parking.duration * 24 * 60 * 60 * 1000; // Toplam süre (ms)
-            const elapsedMs = now - savedDate; // Geçen süre (ms)
-            const remainingMs = totalDurationMs - elapsedMs; // Kalan süre (ms)
-            
-            if (remainingMs > 0) {
-                // Kalan süreyi saat ve güne çevir
-                const remainingHours = Math.ceil(remainingMs / (1000 * 60 * 60));
-                const remainingDays = Math.floor(remainingHours / 24);
-                
-                let durationText = '';
-                if (remainingHours < 24) {
-                    durationText = `${remainingHours} saat`;
-                } else if (remainingDays === 1) {
-                    durationText = '1 gün';
-                } else {
-                    durationText = `${remainingDays} gün`;
-                }
-                
-                durationChip = `<span class="duration-chip-bottom">${durationText}</span>`;
-            } else {
-                // Süre dolmuş
-                durationChip = `<span class="duration-chip-bottom expired">Süresi doldu</span>`;
-            }
+        // Renk chip'i oluştur
+        let colorChip = '';
+        if (colorInfo) {
+            colorChip = `<span class="color-chip-bottom" style="background: ${colorInfo.hex};">${colorInfo.name}</span>`;
         }
         
         // Not uzunluğunu kontrol et (20 karakterden uzunsa kayar yazı - infinite loop)
@@ -483,7 +458,7 @@ class CarLocationApp {
                 <div class="saved-car-title">${title}</div>
                 ${noteHtml}
                 <div class="saved-car-time">${formattedTime}</div>
-                ${durationChip}
+                ${colorChip}
             </div>
             <div class="saved-car-actions">
                 <button class="btn-circular btn-navigate" data-index="${index}" title="Rota Oluştur">
