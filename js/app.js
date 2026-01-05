@@ -15,15 +15,21 @@ class CarLocationApp {
         this.broadcastChannel = null; // Cross-tab communication
         this.currentPhoto = null; // Mevcut resim base64
         
+        // Parking data from JSON
+        this.parkingData = null;
+        this.parkingColors = {};
+        this.parkingSpots = [];
+        
         // iOS Picker için değişkenler
         this.dataFloors = ["B1", "B2"];
-        this.dataColumns = Array.from({length: 16}, (_, i) => String.fromCharCode(65 + i)); // A-P
-        this.dataNumbers = Array.from({length: 22}, (_, i) => i); // 0-21
+        this.dataColumns = [];
+        this.dataNumbers = [];
         this.ITEM_HEIGHT = 36;
         this.LOOP_MULTIPLIER = 60;
         this.selectedFloor = "B1";
-        this.selectedColumn = "A";
-        this.selectedNumber = 0;
+        this.selectedColumn = "";
+        this.selectedNumber = "";
+        this.selectedColor = null;
         this.selectedDuration = 1; // Default 1 gün
         
         // Sabit başlangıç noktası
@@ -51,6 +57,9 @@ class CarLocationApp {
             // BroadcastChannel'ı başlat
             this.initBroadcastChannel();
             
+            // Parking verilerini yükle
+            await this.loadParkingData();
+            
             // Haritayı başlat
             this.initializeMap();
             
@@ -76,6 +85,105 @@ class CarLocationApp {
             console.error('Başlatma hatası:', error);
             this.showNotification('Uygulama başlatılırken hata oluştu', 'error');
         }
+    }
+
+    async loadParkingData() {
+        try {
+            const response = await fetch('data/parking-spots.json');
+            this.parkingData = await response.json();
+            this.parkingColors = this.parkingData.colors;
+            this.parkingSpots = this.parkingData.parkingSpots;
+            
+            // Katları ayarla
+            this.dataFloors = Object.values(this.parkingData.floors);
+            
+            // İlk kat için sütunları güncelle
+            this.updateColumnsForFloor(this.selectedFloor);
+            
+            console.log('Parking verileri yüklendi:', this.parkingSpots.length, 'park yeri');
+        } catch (error) {
+            console.error('Parking verileri yüklenemedi:', error);
+            // Fallback değerler
+            this.dataFloors = ["B1", "B2"];
+            this.dataColumns = ["A", "B", "C", "D", "E", "F"];
+            this.dataNumbers = ["01", "02", "03", "04", "05"];
+        }
+    }
+
+    getFloorNumber(floorName) {
+        // B1 -> -1, B2 -> -2
+        const entry = Object.entries(this.parkingData.floors).find(([key, val]) => val === floorName);
+        return entry ? parseInt(entry[0]) : -1;
+    }
+
+    updateColumnsForFloor(floorName) {
+        const floorNum = this.getFloorNumber(floorName);
+        
+        // Bu kattaki park yerlerini filtrele
+        const spotsOnFloor = this.parkingSpots.filter(spot => spot.floor === floorNum);
+        
+        // Benzersiz sütun harflerini al ve sırala
+        const columns = [...new Set(spotsOnFloor.map(spot => spot.spot.charAt(0)))].sort();
+        this.dataColumns = columns;
+        
+        // İlk sütunu seç ve numaraları güncelle
+        if (columns.length > 0) {
+            this.selectedColumn = columns[0];
+            this.updateNumbersForColumn(floorName, this.selectedColumn);
+        }
+    }
+
+    updateNumbersForColumn(floorName, column) {
+        const floorNum = this.getFloorNumber(floorName);
+        
+        // Bu kat ve sütundaki park yerlerini filtrele
+        const spotsInColumn = this.parkingSpots.filter(spot => 
+            spot.floor === floorNum && spot.spot.charAt(0) === column
+        );
+        
+        // Benzersiz numaraları al ve sırala
+        const numbers = [...new Set(spotsInColumn.map(spot => spot.spot.substring(1)))].sort((a, b) => parseInt(a) - parseInt(b));
+        this.dataNumbers = numbers;
+        
+        // İlk numarayı seç
+        if (numbers.length > 0) {
+            this.selectedNumber = numbers[0];
+        }
+        
+        // Renk bilgisini güncelle
+        this.updateSelectedColor();
+    }
+
+    updateSelectedColor() {
+        const floorNum = this.getFloorNumber(this.selectedFloor);
+        const spotName = this.selectedColumn + this.selectedNumber;
+        
+        const spot = this.parkingSpots.find(s => 
+            s.floor === floorNum && s.spot === spotName
+        );
+        
+        if (spot && this.parkingColors[spot.color]) {
+            this.selectedColor = {
+                code: spot.color,
+                ...this.parkingColors[spot.color]
+            };
+        } else {
+            this.selectedColor = null;
+        }
+    }
+
+    getSpotColor(floorName, column, number) {
+        const floorNum = this.getFloorNumber(floorName);
+        const spotName = column + number;
+        
+        const spot = this.parkingSpots.find(s => 
+            s.floor === floorNum && s.spot === spotName
+        );
+        
+        if (spot && this.parkingColors[spot.color]) {
+            return this.parkingColors[spot.color];
+        }
+        return null;
     }
 
     initIndexedDB() {
@@ -294,8 +402,10 @@ class CarLocationApp {
         
         const parkingSpot = parking.parkingSpot || '';
         const floor = parking.floor || '';
-        // Yeni format: Önce kat, sonra park yeri
-        const title = `Kat ${floor} · ${parkingSpot}`;
+        const colorInfo = parking.color;
+        // Yeni format: Önce kat, sonra park yeri, sonra renk
+        const colorText = colorInfo ? ` · ${colorInfo.name}` : '';
+        const title = `Kat ${floor} · ${parkingSpot}${colorText}`;
         
         // Tarih formatla
         const savedTime = parking.timestamp ? new Date(parking.timestamp) : new Date();
@@ -306,10 +416,25 @@ class CarLocationApp {
             minute: '2-digit'
         });
         
-        // Resim varsa resim göster, yoksa emoji göster
+        // Resim varsa resim göster, yoksa otopark sütunu ikonu göster
+        const spotColor = colorInfo ? colorInfo.hex : '#2563eb';
         const iconHtml = parking.photo 
             ? `<div class="saved-car-icon saved-car-photo" data-photo="${parking.photo}" style="background-image: url(${parking.photo})"></div>`
-            : `<div class="saved-car-icon">🚗</div>`;
+            : `<div class="saved-car-icon parking-pillar-icon">
+                <svg viewBox="0 0 60 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Üst kapak -->
+                    <rect x="4" y="2" width="52" height="6" rx="3" fill="${spotColor}"/>
+                    <!-- Ana gövde üst (beyaz) -->
+                    <rect x="8" y="8" width="44" height="42" fill="white" stroke="${spotColor}" stroke-width="2"/>
+                    <!-- Alt bölge (boyalı) -->
+                    <rect x="8" y="50" width="44" height="22" fill="${spotColor}"/>
+                    <!-- Daire ve kod -->
+                    <circle cx="30" cy="30" r="14" fill="white" stroke="${spotColor}" stroke-width="2"/>
+                    <text x="30" y="35" text-anchor="middle" fill="${spotColor}" font-size="12" font-weight="700" font-family="system-ui">${parkingSpot}</text>
+                    <!-- Alt kapak -->
+                    <rect x="4" y="72" width="52" height="6" rx="3" fill="${spotColor}"/>
+                </svg>
+               </div>`;
         
         // Kalan süreyi hesapla
         let durationChip = '';
@@ -448,8 +573,9 @@ class CarLocationApp {
         const noteValue = note ? note.value : '';
         
         // Picker'dan seçilen değerleri al
-        const parkingSpot = `${this.selectedColumn}-${this.selectedNumber}`;
+        const parkingSpot = `${this.selectedColumn}${this.selectedNumber}`;
         const floor = this.selectedFloor;
+        const colorInfo = this.selectedColor;
         
         // Park yerini otopark konumlarından bul veya varsayılan konum kullan
         let parking = this.parkingLocations[parkingSpot];
@@ -479,6 +605,7 @@ class CarLocationApp {
             note: noteValue,
             photo: this.currentPhoto, // Resmi ekle
             duration: durationDays, // Gün sayısı
+            color: colorInfo, // Renk bilgisi
             location: {
                 lat: parking.lat,
                 lng: parking.lng
@@ -841,8 +968,46 @@ class CarLocationApp {
 
     initAllPickerLists() {
         this.initNormalList('content-floor', this.dataFloors);
-        this.initInfiniteList('content-column', this.dataColumns);
-        this.initInfiniteList('content-number', this.dataNumbers);
+        this.rebuildColumnList();
+        this.rebuildNumberList();
+    }
+
+    rebuildColumnList() {
+        const container = document.getElementById('content-column');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        this.dataColumns.forEach(item => {
+            const div = this.createItem(item);
+            // Renk göstergesi ekle
+            const color = this.getColumnColor(this.selectedFloor, item);
+            if (color) {
+                div.style.color = color.hex;
+            }
+            container.appendChild(div);
+        });
+    }
+
+    rebuildNumberList() {
+        const container = document.getElementById('content-number');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        this.dataNumbers.forEach(item => {
+            container.appendChild(this.createItem(item));
+        });
+    }
+
+    getColumnColor(floorName, column) {
+        const floorNum = this.getFloorNumber(floorName);
+        const spot = this.parkingSpots.find(s => 
+            s.floor === floorNum && s.spot.charAt(0) === column
+        );
+        
+        if (spot && this.parkingColors[spot.color]) {
+            return this.parkingColors[spot.color];
+        }
+        return null;
     }
 
     handleScroll(column) {
@@ -891,13 +1056,16 @@ class CarLocationApp {
         }
     }
 
-    updatePickerValues() {
+    updatePickerValues(changedColumn = null) {
         const colFloor = document.getElementById('col-floor');
         const colColumn = document.getElementById('col-column');
         const colNumber = document.getElementById('col-number');
         const resultDisplay = document.getElementById('result-display');
         
         if (!colFloor || !colColumn || !colNumber || !resultDisplay) return;
+
+        const prevFloor = this.selectedFloor;
+        const prevColumn = this.selectedColumn;
 
         const selFloorEl = colFloor.querySelector('.selected');
         if(selFloorEl) this.selectedFloor = selFloorEl.dataset.value;
@@ -908,7 +1076,57 @@ class CarLocationApp {
         const selNumEl = colNumber.querySelector('.selected');
         if(selNumEl) this.selectedNumber = selNumEl.dataset.value;
 
-        resultDisplay.innerText = `${this.selectedFloor} - ${this.selectedColumn} - ${this.selectedNumber}`;
+        // Kat değiştiyse sütunları güncelle
+        if (changedColumn === 'floor' || (prevFloor !== this.selectedFloor && this.parkingData)) {
+            this.updateColumnsForFloor(this.selectedFloor);
+            this.rebuildColumnList();
+            
+            // Sütun picker'ı yeniden başlat
+            setTimeout(() => {
+                const colColumn = document.getElementById('col-column');
+                if (colColumn && this.dataColumns.length > 0) {
+                    this.scrollToValue(colColumn, this.dataColumns[0], false);
+                    this.handleScroll(colColumn);
+                    this.rebuildNumberList();
+                    
+                    setTimeout(() => {
+                        const colNumber = document.getElementById('col-number');
+                        if (colNumber && this.dataNumbers.length > 0) {
+                            this.scrollToValue(colNumber, this.dataNumbers[0], false);
+                            this.handleScroll(colNumber);
+                        }
+                    }, 50);
+                }
+            }, 50);
+        }
+        // Sütun değiştiyse numaraları güncelle
+        else if (changedColumn === 'column' || (prevColumn !== this.selectedColumn && this.parkingData)) {
+            this.updateNumbersForColumn(this.selectedFloor, this.selectedColumn);
+            this.rebuildNumberList();
+            
+            // Numara picker'ı yeniden başlat
+            setTimeout(() => {
+                const colNumber = document.getElementById('col-number');
+                if (colNumber && this.dataNumbers.length > 0) {
+                    this.scrollToValue(colNumber, this.dataNumbers[0], false);
+                    this.handleScroll(colNumber);
+                }
+            }, 50);
+        }
+
+        // Renk bilgisini güncelle
+        this.updateSelectedColor();
+
+        // Sonucu göster
+        const colorInfo = this.selectedColor ? ` (${this.selectedColor.name})` : '';
+        resultDisplay.innerText = `${this.selectedFloor} - ${this.selectedColumn}${this.selectedNumber}${colorInfo}`;
+        
+        // Renk göstergesi
+        if (this.selectedColor) {
+            resultDisplay.style.color = this.selectedColor.hex;
+        } else {
+            resultDisplay.style.color = '#000';
+        }
     }
 
     scrollToValue(column, value, isInfinite, dataLength) {
@@ -946,7 +1164,7 @@ class CarLocationApp {
         }
     }
 
-    setupPickerColumn(column, isInfinite, dataLength) {
+    setupPickerColumn(column, isInfinite, dataLength, columnType = null) {
         column.addEventListener('scroll', () => {
             window.requestAnimationFrame(() => {
                 this.handleScroll(column);
@@ -954,7 +1172,7 @@ class CarLocationApp {
             });
             
             clearTimeout(column.scrollTimeout);
-            column.scrollTimeout = setTimeout(() => this.updatePickerValues(), 50);
+            column.scrollTimeout = setTimeout(() => this.updatePickerValues(columnType), 50);
         });
         
         column.addEventListener('click', (e) => {
@@ -974,17 +1192,24 @@ class CarLocationApp {
 
         this.initAllPickerLists();
         
-        this.setupPickerColumn(colFloor, false);
-        this.setupPickerColumn(colColumn, true, this.dataColumns.length);
-        this.setupPickerColumn(colNumber, true, this.dataNumbers.length);
+        // Sütun tiplerini belirt (floor, column, number)
+        this.setupPickerColumn(colFloor, false, 0, 'floor');
+        this.setupPickerColumn(colColumn, false, 0, 'column');
+        this.setupPickerColumn(colNumber, false, 0, 'number');
 
         setTimeout(() => {
             this.scrollToValue(colFloor, this.selectedFloor, false);
-            this.scrollToValue(colColumn, this.selectedColumn, true, this.dataColumns.length);
-            this.scrollToValue(colNumber, this.selectedNumber, true, this.dataNumbers.length);
+            
+            if (this.dataColumns.length > 0) {
+                this.scrollToValue(colColumn, this.selectedColumn || this.dataColumns[0], false);
+            }
+            
+            if (this.dataNumbers.length > 0) {
+                this.scrollToValue(colNumber, this.selectedNumber || this.dataNumbers[0], false);
+            }
             
             this.updatePickerValues();
-        }, 50);
+        }, 100);
     }
 
     handlePhotoUpload(event) {
@@ -1287,7 +1512,13 @@ class CarLocationApp {
         const padding = 20;
         const size = Math.max(rect.width, rect.height) + padding;
         const targetTop = rect.top + rect.height / 2;
-        const targetLeft = rect.left + rect.width / 2;
+        
+        // Buton merkezi
+        let targetLeft = rect.left + rect.width / 2;
+        
+        // Ekran sınırlarını kontrol et (sağ taraf taşmasın)
+        const maxLeft = window.innerWidth - (size / 2) - 5;
+        targetLeft = Math.min(targetLeft, maxLeft);
 
         spotlight.style.width = size + 'px';
         spotlight.style.height = size + 'px';
