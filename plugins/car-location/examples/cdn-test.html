@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Location Plugin - CDN Test</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fuseq/car-location-plugin@main/plugins/car-location/frontend/css/styles.css">
+</head>
+<body class="clp-page">
+    <div class="clp-container">
+        
+        <!-- Picker Card -->
+        <div class="clp-card">
+            <div class="clp-picker-pane">
+                <div class="clp-picker-header">
+                    <span class="clp-picker-result" id="pickerResult">Yükleniyor...</span>
+                </div>
+                
+                <div class="clp-picker-labels">
+                    <span>Kat</span>
+                    <span>Blok</span>
+                    <span>No</span>
+                </div>
+                
+                <div class="clp-date-picker">
+                    <div class="clp-highlight-bar"></div>
+                    <div class="clp-column" id="col-floor">
+                        <div class="clp-column-content" id="content-floor"></div>
+                    </div>
+                    <div class="clp-column" id="col-column">
+                        <div class="clp-column-content" id="content-column"></div>
+                    </div>
+                    <div class="clp-column" id="col-number">
+                        <div class="clp-column-content" id="content-number"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Not + Fotoğraf -->
+            <div class="clp-note-container clp-mt-md">
+                <textarea class="clp-note-textarea" id="noteInput" placeholder="Not ve/veya resim ekle (Opsiyonel)"></textarea>
+                <button type="button" class="clp-camera-btn" id="cameraBtn" title="Resim Ekle">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                        <circle cx="12" cy="13" r="4"/>
+                    </svg>
+                </button>
+                <input type="file" id="photoInput" accept="image/*" capture="environment" style="display: none;">
+            </div>
+            
+            <!-- Kaydet Butonu -->
+            <button class="clp-btn-save clp-mt-sm" id="saveBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                    <polyline points="17 21 17 13 7 13 7 21"/>
+                    <polyline points="7 3 7 8 15 8"/>
+                </svg>
+                Kaydet
+            </button>
+        </div>
+        
+        <!-- Saved Cars Card -->
+        <div class="clp-card">
+            <h3 class="clp-card-title">Kayıtlı Araçlar</h3>
+            <div class="clp-list" id="parkingList">
+                <div class="clp-empty">
+                    <span class="clp-empty-icon">🅿️</span>
+                    <p class="clp-empty-text">Yükleniyor...</p>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <!-- Plugin JS -->
+    <script src="https://cdn.jsdelivr.net/gh/fuseq/car-location-plugin@main/plugins/car-location/backend/js/core.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/fuseq/car-location-plugin@main/plugins/car-location/frontend/js/ui.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/fuseq/car-location-plugin@main/plugins/car-location/plugin.js"></script>
+    
+    <script>
+        new CarLocationPlugin({
+            dataPath: 'https://cdn.jsdelivr.net/gh/fuseq/car-location-plugin@main/plugins/car-location/backend/data/parking-spots.json'
+        }).init();
+    </script>
+</body>
+</html>
+

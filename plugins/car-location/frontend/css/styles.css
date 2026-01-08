@@ -1,0 +1,747 @@
+/**
+ * Car Location Plugin - Styles
+ * @version 1.0.0
+ */
+
+/* ==================== CSS VARIABLES ==================== */
+:root {
+    --clp-primary: #2563eb;
+    --clp-primary-dark: #1e40af;
+    --clp-secondary: #10b981;
+    --clp-secondary-dark: #059669;
+    --clp-danger: #ef4444;
+    --clp-danger-dark: #dc2626;
+    --clp-info: #3b82f6;
+    
+    --clp-bg: #f8fafc;
+    --clp-card-bg: #ffffff;
+    --clp-text: #1e293b;
+    --clp-text-secondary: #64748b;
+    --clp-text-muted: #8e8e93;
+    --clp-border: #e2e8f0;
+    
+    --clp-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --clp-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    
+    --clp-item-height: 36px;
+    --clp-visible-items: 3;
+    --clp-radius: 12px;
+    --clp-radius-sm: 8px;
+}
+
+/* ==================== RESET ==================== */
+.clp-container *,
+.clp-container *::before,
+.clp-container *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ==================== BASE CONTAINER ==================== */
+.clp-container {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: var(--clp-text);
+    line-height: 1.5;
+}
+
+/* ==================== EXPAND BUTTON ==================== */
+.clp-expand-btn {
+    position: fixed;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--clp-primary) 0%, var(--clp-primary-dark) 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    z-index: 1001;
+}
+
+.clp-expand-btn:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.clp-expand-btn svg {
+    width: 28px;
+    height: 28px;
+    transition: transform 0.3s ease;
+}
+
+.clp-expand-btn.expanded {
+    background: linear-gradient(135deg, var(--clp-secondary) 0%, var(--clp-secondary-dark) 100%);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+/* ==================== BOTTOM SHEET ==================== */
+.clp-bottom-sheet {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    max-height: 85vh;
+    transform: translateY(calc(100% - 120px));
+}
+
+.clp-bottom-sheet.expanded {
+    transform: translateY(0);
+}
+
+.clp-sheet-handle {
+    width: 40px;
+    height: 5px;
+    background: var(--clp-border);
+    border-radius: 10px;
+    margin: 12px auto;
+    cursor: grab;
+}
+
+.clp-sheet-handle:active {
+    cursor: grabbing;
+}
+
+.clp-sheet-content {
+    padding: 0 20px 30px 20px;
+    overflow-y: auto;
+    max-height: calc(85vh - 40px);
+}
+
+/* ==================== CARDS ==================== */
+.clp-card {
+    background: var(--clp-bg);
+    border-radius: var(--clp-radius);
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.clp-card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--clp-text);
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+/* ==================== iOS PICKER ==================== */
+.clp-picker-pane {
+    background: var(--clp-bg);
+    border-radius: var(--clp-radius);
+    padding: 14px 16px;
+    margin-bottom: 8px;
+}
+
+.clp-picker-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 8px;
+    height: 24px;
+}
+
+.clp-picker-result {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--clp-text);
+    transition: color 0.3s ease;
+}
+
+.clp-picker-labels {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--clp-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.clp-picker-labels span {
+    flex: 1;
+    text-align: center;
+}
+
+.clp-date-picker {
+    display: flex;
+    position: relative;
+    height: calc(var(--clp-item-height) * var(--clp-visible-items));
+    overflow: hidden;
+    mask-image: linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%);
+}
+
+.clp-highlight-bar {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: var(--clp-item-height);
+    background-color: rgba(0, 0, 0, 0.05);
+    transform: translateY(-50%);
+    border-radius: var(--clp-radius-sm);
+    pointer-events: none;
+    z-index: -1;
+}
+
+.clp-column {
+    flex: 1;
+    height: 100%;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    scrollbar-width: none;
+    position: relative;
+}
+
+.clp-column::-webkit-scrollbar {
+    display: none;
+}
+
+.clp-column-content {
+    padding: calc(var(--clp-item-height)) 0;
+}
+
+.clp-item {
+    height: var(--clp-item-height);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    color: var(--clp-text-muted);
+    scroll-snap-align: center;
+    transform-origin: center center;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: color 0.2s ease;
+}
+
+.clp-item.selected {
+    color: #000000;
+    font-weight: 600;
+}
+
+/* ==================== NOTE INPUT ==================== */
+.clp-note-container {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.clp-note-textarea {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid var(--clp-border);
+    background: var(--clp-card-bg);
+    border-radius: var(--clp-radius-sm);
+    font-size: 14px;
+    color: var(--clp-text);
+    outline: none;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    resize: none;
+    min-height: 64px;
+    height: 64px;
+    line-height: 1.4;
+}
+
+.clp-note-textarea:focus {
+    border-color: var(--clp-primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.clp-note-textarea::placeholder {
+    color: var(--clp-text-muted);
+}
+
+/* ==================== CAMERA BUTTON ==================== */
+.clp-camera-btn {
+    width: 64px;
+    min-width: 64px;
+    height: 64px;
+    border: 1px solid var(--clp-border);
+    background: var(--clp-card-bg);
+    border-radius: var(--clp-radius-sm);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--clp-text-secondary);
+    padding: 0;
+}
+
+.clp-camera-btn:active {
+    transform: scale(0.98);
+}
+
+.clp-camera-btn.has-photo {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    border-color: var(--clp-secondary);
+}
+
+.clp-camera-btn.has-photo svg {
+    display: none;
+}
+
+.clp-camera-btn.has-photo::after {
+    content: '✕';
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* ==================== SAVE BUTTON ==================== */
+.clp-btn-save {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: var(--clp-radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--clp-secondary) 0%, var(--clp-secondary-dark) 100%);
+    color: white;
+    letter-spacing: -0.2px;
+}
+
+.clp-btn-save:active {
+    transform: scale(0.98);
+}
+
+.clp-btn-save svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* ==================== CAR CARDS LIST ==================== */
+.clp-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    max-height: 300px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.clp-list::-webkit-scrollbar {
+    width: 3px;
+}
+
+.clp-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.clp-list::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 2px;
+}
+
+/* ==================== CAR CARD ==================== */
+.clp-car-card {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 14px;
+    background: var(--clp-bg);
+    border-radius: 0;
+    transition: all 0.2s ease;
+    width: 100%;
+    border-bottom: 1px solid var(--clp-border);
+}
+
+.clp-car-card:first-child {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.clp-car-card:last-child {
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-bottom: none;
+}
+
+.clp-car-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.clp-car-icon.pillar {
+    background: var(--clp-bg);
+    border: 1px solid var(--clp-border);
+    padding: 4px;
+}
+
+.clp-car-icon.pillar svg {
+    width: 100%;
+    height: 100%;
+}
+
+.clp-car-icon.has-photo {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    position: relative;
+    border: 1px solid var(--clp-border);
+}
+
+.clp-car-icon.has-photo::after {
+    content: '⤢';
+    position: absolute;
+    bottom: -6px;
+    right: -6px;
+    background-color: var(--clp-primary);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.clp-car-icon.has-photo:active {
+    transform: scale(0.98);
+}
+
+.clp-car-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 64px;
+}
+
+.clp-car-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--clp-text);
+    margin-bottom: 2px;
+    letter-spacing: -0.2px;
+    white-space: nowrap;
+    line-height: 1.2;
+}
+
+.clp-color-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 6px;
+    color: white;
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 600;
+    margin-top: 2px;
+    width: fit-content;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.clp-car-note {
+    font-size: 11px;
+    color: var(--clp-text-secondary);
+    margin-bottom: 2px;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    position: relative;
+    max-width: 100%;
+    height: 14px;
+}
+
+.clp-car-note.scrolling .clp-marquee {
+    display: inline-flex;
+    animation: clp-marquee 10s linear infinite;
+}
+
+.clp-car-note .clp-marquee span {
+    padding-right: 40px;
+}
+
+@keyframes clp-marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+.clp-car-time {
+    font-size: 11px;
+    color: var(--clp-text-muted);
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+/* ==================== ACTION BUTTONS ==================== */
+.clp-car-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.clp-btn-circular {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.clp-btn-circular:active {
+    transform: scale(0.95);
+}
+
+.clp-btn-circular.navigate {
+    background: var(--clp-secondary);
+    color: white;
+}
+
+.clp-btn-circular.share {
+    background: var(--clp-info);
+    color: white;
+}
+
+.clp-btn-circular.delete {
+    background: var(--clp-danger);
+    color: white;
+}
+
+/* ==================== NOTIFICATION ==================== */
+.clp-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    padding: 14px 24px;
+    border-radius: var(--clp-radius);
+    box-shadow: var(--clp-shadow-lg);
+    font-weight: 600;
+    font-size: 14px;
+    transition: transform 0.3s ease;
+    z-index: 10000;
+    max-width: 90%;
+    text-align: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.clp-notification.show {
+    transform: translateX(-50%) translateY(0);
+}
+
+.clp-notification.success {
+    background: var(--clp-secondary);
+    color: white;
+}
+
+.clp-notification.error {
+    background: var(--clp-danger);
+    color: white;
+}
+
+.clp-notification.info {
+    background: var(--clp-primary);
+    color: white;
+}
+
+/* ==================== PHOTO MODAL ==================== */
+.clp-photo-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10001;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.clp-photo-modal.show {
+    display: flex;
+    opacity: 1;
+}
+
+.clp-photo-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    cursor: pointer;
+}
+
+.clp-photo-modal-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+    z-index: 1;
+    animation: clp-photo-zoom 0.3s ease;
+}
+
+@keyframes clp-photo-zoom {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.clp-photo-modal-image {
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: var(--clp-radius);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    display: block;
+}
+
+.clp-photo-modal-close {
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: white;
+    color: var(--clp-text);
+    border: none;
+    font-size: 28px;
+    font-weight: 300;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
+    line-height: 1;
+    padding: 0;
+}
+
+.clp-photo-modal-close:hover {
+    background: var(--clp-danger);
+    color: white;
+    transform: scale(1.1) rotate(90deg);
+}
+
+/* ==================== EMPTY STATE ==================== */
+.clp-empty {
+    text-align: center;
+    padding: 24px;
+    color: var(--clp-text-secondary);
+}
+
+.clp-empty-icon {
+    font-size: 40px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.clp-empty-text {
+    font-size: 14px;
+}
+
+/* ==================== UTILITIES ==================== */
+.clp-mt-sm { margin-top: 8px; }
+.clp-mt-md { margin-top: 12px; }
+.clp-mt-lg { margin-top: 16px; }
+.clp-mb-sm { margin-bottom: 8px; }
+.clp-mb-md { margin-bottom: 12px; }
+.clp-mb-lg { margin-bottom: 16px; }
+.clp-hidden { display: none !important; }
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 480px) {
+    .clp-expand-btn {
+        width: 52px;
+        height: 52px;
+        right: 10px;
+    }
+
+    .clp-expand-btn svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .clp-car-card {
+        padding: 8px 10px;
+        gap: 8px;
+    }
+
+    .clp-car-icon {
+        width: 58px;
+        height: 58px;
+    }
+
+    .clp-btn-circular {
+        width: 34px;
+        height: 34px;
+    }
+
+    .clp-btn-circular svg {
+        width: 16px;
+        height: 16px;
+    }
+}
+
+/* ==================== STANDALONE PAGE ==================== */
+.clp-page {
+    background: var(--clp-bg);
+    min-height: 100vh;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.clp-page .clp-container {
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+
