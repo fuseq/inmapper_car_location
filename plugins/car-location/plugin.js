@@ -420,16 +420,71 @@ class CarLocationPlugin extends CLPCore {
     setSelection(floor, column, number) {
         if (floor) {
             this.setFloor(floor);
-            this.picker?.updateColumnData('column', this.getColumnsForPicker());
+            this.picker?.updateColumnData('column', this.getColumnsForPicker(), false);
         }
         if (column) {
             this.setColumn(column);
-            this.picker?.updateColumnData('number', this.getNumbersForPicker());
+            this.picker?.updateColumnData('number', this.getNumbersForPicker(), false);
         }
         if (number) {
             this.setNumber(number);
         }
         this.updatePickerResult();
+    }
+
+    /**
+     * Set initial selection with validation and scroll
+     * Başlangıçta picker'da belirli değerleri seçili olarak ayarlar
+     * @param {string} floor - Kat (örn: "B1")
+     * @param {string} column - Blok (örn: "A")
+     * @param {string} number - No (örn: "01")
+     * @returns {object} { success: boolean, message?: string }
+     */
+    setInitialSelection(floor, column, number) {
+        const result = { success: true, matched: { floor: false, column: false, number: false } };
+        
+        // 1. Kat kontrolü ve ayarı
+        const floors = this.getFloorsForPicker();
+        if (floor && floors.includes(floor)) {
+            this.setFloor(floor);
+            this.picker?.updateColumnData('column', this.getColumnsForPicker(), false);
+            this.picker?.scrollToValue('floor', floor);
+            this.picker?.applyColorToColumn('column', this);
+            result.matched.floor = true;
+        }
+        
+        // 2. Blok kontrolü ve ayarı
+        const columns = this.getColumnsForPicker();
+        if (column && columns.includes(column)) {
+            this.setColumn(column);
+            this.picker?.updateColumnData('number', this.getNumbersForPicker(), false);
+            this.picker?.scrollToValue('column', column);
+            result.matched.column = true;
+        }
+        
+        // 3. No kontrolü ve ayarı
+        const numbers = this.getNumbersForPicker();
+        if (number && numbers.includes(number)) {
+            this.setNumber(number);
+            this.picker?.scrollToValue('number', number);
+            result.matched.number = true;
+        }
+        
+        this.updatePickerResult();
+        
+        // Sonuç
+        const allMatched = result.matched.floor && result.matched.column && result.matched.number;
+        result.success = allMatched;
+        
+        if (!allMatched) {
+            const mismatched = [];
+            if (floor && !result.matched.floor) mismatched.push(`floor: ${floor}`);
+            if (column && !result.matched.column) mismatched.push(`column: ${column}`);
+            if (number && !result.matched.number) mismatched.push(`number: ${number}`);
+            result.message = `Değerler bulunamadı: ${mismatched.join(', ')}`;
+        }
+        
+        return result;
     }
 
     /**

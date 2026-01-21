@@ -75,17 +75,71 @@ class CLPPicker {
         });
     }
 
+    /**
+     * Sütun verilerini günceller - parlama olmadan
+     * Mevcut item'ları korur, sadece değişenleri günceller
+     */
     updateColumnData(colId, newData, resetScroll = true) {
         const col = this.columns[colId];
         if (!col) return;
 
-        this.populateColumn(colId, newData);
+        const currentItems = Array.from(col.content.querySelectorAll('.clp-item'));
+        const currentValues = currentItems.map(item => item.dataset.value);
         
+        // Eğer veriler aynıysa hiçbir şey yapma
+        if (JSON.stringify(currentValues) === JSON.stringify(newData)) {
+            return;
+        }
+
+        // Mevcut seçili değeri bul
+        const selectedItem = col.element.querySelector('.clp-item.selected');
+        const previousValue = selectedItem?.dataset.value;
+        
+        // Yeni verilerde önceki seçili değer var mı kontrol et
+        const keepPreviousValue = previousValue && newData.includes(previousValue);
+        
+        // Verileri güncelle (DOM'u yeniden oluştur - ama smooth)
+        col.data = newData;
+        
+        // Mevcut item sayısı ile yeni item sayısını karşılaştır
+        const diff = newData.length - currentItems.length;
+        
+        // Fazla item'ları kaldır
+        if (diff < 0) {
+            for (let i = 0; i < Math.abs(diff); i++) {
+                const lastItem = col.content.lastElementChild;
+                if (lastItem) lastItem.remove();
+            }
+        }
+        
+        // Mevcut item'ları güncelle
+        const updatedItems = col.content.querySelectorAll('.clp-item');
+        updatedItems.forEach((item, index) => {
+            if (index < newData.length) {
+                item.innerText = newData[index];
+                item.dataset.value = newData[index];
+            }
+        });
+        
+        // Eksik item'ları ekle
+        if (diff > 0) {
+            for (let i = currentItems.length; i < newData.length; i++) {
+                const div = document.createElement('div');
+                div.className = 'clp-item';
+                div.innerText = newData[i];
+                div.dataset.value = newData[i];
+                col.content.appendChild(div);
+            }
+        }
+        
+        // Scroll pozisyonu ayarla
         if (resetScroll && newData.length > 0) {
-            setTimeout(() => {
-                this.scrollToValue(colId, newData[0]);
+            const scrollTarget = keepPreviousValue ? previousValue : newData[0];
+            // requestAnimationFrame ile smooth scroll
+            requestAnimationFrame(() => {
+                this.scrollToValue(colId, scrollTarget);
                 this.handleScroll(col.element);
-            }, 30);
+            });
         }
     }
 

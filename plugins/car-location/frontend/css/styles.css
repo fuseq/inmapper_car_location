@@ -211,6 +211,8 @@
 
 .clp-column-content {
     padding: calc(var(--clp-item-height)) 0;
+    /* Animasyon sırasında smooth görünüm için */
+    contain: content;
 }
 
 .clp-item {
@@ -225,7 +227,8 @@
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
-    transition: color 0.2s ease;
+    transition: color 0.15s ease, opacity 0.15s ease, transform 0.1s ease;
+    will-change: transform, opacity;
 }
 
 .clp-item.selected {
@@ -743,5 +746,6 @@
     max-width: 480px;
     margin: 0 auto;
 }
+
 
 
