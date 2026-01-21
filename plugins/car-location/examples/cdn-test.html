@@ -6,77 +6,9 @@
     <title>Car Location Plugin - CDN Demo</title>
     <!-- Plugin CSS - v1.0.3 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fuseq/inmapper_car_location@main/plugins/car-location/frontend/css/styles.css?v=1.0.3">
-    <style>
-        .test-input-group {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-        .test-input {
-            flex: 1;
-            padding: 12px 16px;
-            border: 2px solid rgba(255,255,255,0.2);
-            border-radius: 10px;
-            background: rgba(255,255,255,0.1);
-            color: #1e293b;
-            font-size: 16px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            outline: none;
-            transition: border-color 0.2s, background 0.2s;
-        }
-        .test-input::placeholder {
-            color: #94a3b8;
-            font-weight: 400;
-            text-transform: none;
-            letter-spacing: 0;
-        }
-        .test-input:focus {
-            border-color: #667eea;
-            background: rgba(255,255,255,0.15);
-        }
-        .test-btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 14px;
-            transition: transform 0.15s, opacity 0.15s;
-            white-space: nowrap;
-        }
-        .test-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-        .test-btn:active { transform: scale(0.98); }
-        .test-result {
-            padding: 12px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 8px;
-            font-size: 14px;
-            min-height: 20px;
-        }
-        .test-hint {
-            font-size: 12px;
-            color: #64748b;
-            margin-bottom: 8px;
-        }
-    </style>
 </head>
 <body class="clp-page">
     <div class="clp-container">
-        
-        <!-- Test Section -->
-        <div class="clp-card">
-            <h3 class="clp-card-title">🧪 setInitialSelection Test</h3>
-            <div class="test-hint">Format: KAT-BLOK-NO (örn: B1-A-03, B2-C-05)</div>
-            <div class="test-input-group">
-                <input type="text" class="test-input" id="testInput" placeholder="B1-A-01" maxlength="10">
-                <button class="test-btn" id="testBtn">Seç</button>
-            </div>
-            <div class="test-result" id="testResult">Değer girin ve "Seç" butonuna tıklayın...</div>
-        </div>
         
         <!-- Picker Card -->
         <div class="clp-card">
@@ -155,37 +87,8 @@
         plugin.init().then(() => {
             console.log('[Demo] Plugin hazır');
             
-            const inputEl = document.getElementById('testInput');
-            const resultEl = document.getElementById('testResult');
-            const testBtn = document.getElementById('testBtn');
-            
-            // Test fonksiyonu
-            function testSelection() {
-                const value = inputEl.value.trim().toUpperCase();
-                
-                if (!value) {
-                    resultEl.innerHTML = '⚠️ Lütfen bir değer girin (örn: B1-A-03)';
-                    return;
-                }
-                
-                // Pattern parse: KAT-BLOK-NO
-                const parts = value.split('-');
-                if (parts.length !== 3) {
-                    resultEl.innerHTML = '⚠️ Geçersiz format! Doğru format: <strong>KAT-BLOK-NO</strong> (örn: B1-A-03)';
-                    return;
-                }
-                
-                const [floor, column, number] = parts;
-                const r = plugin.setInitialSelection(floor, column, number);
-                
-                resultEl.innerHTML = r.success 
-                    ? `✅ <strong>${value}</strong> başarıyla seçildi` 
-                    : `❌ ${r.message}`;
-            }
-            
-            // Buton click
-            testBtn.addEventListener('click', testSelection);
-            
+            // Başlangıç değeri ayarla (isteğe göre değiştir)
+            plugin.setInitialSelection('B1', 'J', '20');
         });
     </script>
 </body>

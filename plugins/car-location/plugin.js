@@ -448,29 +448,33 @@ class CarLocationPlugin extends CLPCore {
         if (floor && floors.includes(floor)) {
             this.setFloor(floor);
             this.picker?.updateColumnData('column', this.getColumnsForPicker(), false);
-            this.picker?.scrollToValue('floor', floor);
             this.picker?.applyColorToColumn('column', this);
             result.matched.floor = true;
         }
         
-        // 2. Blok kontrolü ve ayarı
+        // 2. Blok kontrolü ve ayarı (kat ayarlandıktan sonra)
         const columns = this.getColumnsForPicker();
         if (column && columns.includes(column)) {
             this.setColumn(column);
             this.picker?.updateColumnData('number', this.getNumbersForPicker(), false);
-            this.picker?.scrollToValue('column', column);
             result.matched.column = true;
         }
         
-        // 3. No kontrolü ve ayarı
+        // 3. No kontrolü ve ayarı (blok ayarlandıktan sonra)
         const numbers = this.getNumbersForPicker();
         if (number && numbers.includes(number)) {
             this.setNumber(number);
-            this.picker?.scrollToValue('number', number);
             result.matched.number = true;
         }
         
         this.updatePickerResult();
+        
+        // DOM güncellemesi için bekle, sonra scroll yap
+        setTimeout(() => {
+            if (result.matched.floor) this.picker?.scrollToValue('floor', floor);
+            if (result.matched.column) this.picker?.scrollToValue('column', column);
+            if (result.matched.number) this.picker?.scrollToValue('number', number);
+        }, 50);
         
         // Sonuç
         const allMatched = result.matched.floor && result.matched.column && result.matched.number;
